@@ -1,0 +1,27 @@
+---
+import Header from "../components/hero.astro"
+import About from "../components/about.astro"
+import Projects from "../components/projects.astro"
+import Guestlog from "../components/guestlog.astro"
+
+import "../index.css"
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+		<title>Sean Outram</title>
+	</head>
+	<body>
+		<Header />
+		<About />
+		<Projects />
+		<Guestlog />
+	</body>
+</html>
