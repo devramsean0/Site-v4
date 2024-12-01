@@ -19,7 +19,7 @@ export function GuestlogForm() {
                     <br />
                     <textarea id="message" name="message"></textarea>
                 </div>
-                <button type="submit">Submit</button>
+                <button class="bg-white rounded-md px-[4.5rem] py-1 text-black" type="submit">Submit</button>
             </div>
         </form>
     )
