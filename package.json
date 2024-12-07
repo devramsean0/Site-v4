@@ -1,5 +1,5 @@
 {
-  "name": "",
+  "name": "site-v4",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
@@ -10,8 +10,9 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
-    "@astrojs/solid-js": "^4.4.4",
-    "astro": "^4.16.16",
+    "@astrojs/solid-js": "5.0.0",
+    "astro": "5.0.3",
+    "dotenv": "^16.4.7",
     "solid-js": "^1.9.3",
     "typescript": "^5.7.2"
   },
