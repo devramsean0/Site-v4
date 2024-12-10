@@ -1,9 +1,17 @@
 ---
 import { GuestlogForm } from "./guestlog/form.tsx"
 import { GuestlogList } from "./guestlog/list.tsx"
+import { getCollection } from "astro:content";
+
+const guestlogCollection = await getCollection("guestlog");
+const guestlog = guestlogCollection.map((entry) => {
+    return {
+        ...entry.data.fields
+    };
+});
 ---
 <section id="guestlog" class="bg-s3 h-screen px-5">
     <h2 class="text-5xl font-bold text-center py-5">Guestlog</h2>
     <GuestlogForm client:load/>
-    <GuestlogList client:load/>
+    <GuestlogList guestlog={guestlog} client:load/>
 </section>
