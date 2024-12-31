@@ -1,13 +1,17 @@
 import type { APIRoute } from "astro";
 
 export const GET: APIRoute = async ({ request }) => {
-    console.log(process.env.PUBLIC_AIRTABLE_API)
-    const res = await fetch("https://api.airtable.com/v0/appjAFKlWvVpwaM7k/Guestlog?view=Active", {
+    const res = await fetch(`https://api.airtable.com/v0/${import.meta.env.AIRTABLE_BASE}/guestlog?view=active`, {
         headers: {
-            Authorization: `Bearer ${process.env.AIRTABLE_API}`,
+            Authorization: `Bearer ${import.meta.env.AIRTABLE_TOKEN}`,
         },
     });
     const resJSON = await res.json();
-    console.log(resJSON)
-    return new Response(JSON.stringify(resJSON.records), {});
+    const guestlog = resJSON.records.map((entry: any) => {
+        delete entry.fields.email;
+        return {
+            ...entry.fields
+        };
+    });
+    return new Response(JSON.stringify(guestlog), {});
 };

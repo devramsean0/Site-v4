@@ -5,8 +5,9 @@ import { getCollection } from "astro:content";
 
 const guestlogCollection = await getCollection("guestlog");
 const guestlog = guestlogCollection.map((entry) => {
+    delete entry.data.email;
     return {
-        ...entry.data.fields
+        ...entry.data
     };
 });
 ---
