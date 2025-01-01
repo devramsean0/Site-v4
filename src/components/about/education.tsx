@@ -39,7 +39,7 @@ export function Education(props: {education: any, providers: any}) {
                                         <h3 class="text-lg font-semibold">{education.data.title}</h3>
                                         <h4 class="text-sm"><a href={education.data.provider.data.link}>{education.data.provider.data.name}</a></h4>
                                     </div>
-                                    <div class="text-sm text-gray-500">
+                                    <div class="text-sm">
                                         {`${education.data.start_date.toLocaleString('default', { month: 'long'})} ${education.data.start_date.getFullYear()}`}
                                         - 
                                         {education.data.end_date ? 

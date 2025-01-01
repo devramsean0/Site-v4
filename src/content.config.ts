@@ -49,12 +49,22 @@ const education_providers = defineCollection({
 
 
 // Projects tables
-const projects = defineCollection({
+const favourite_projects = defineCollection({
      loader: airtableLoader({
         base: import.meta.env.AIRTABLE_BASE,
         table: "projects",
         queryParams: {
-            view: "active",
+            view: "favourite",
+        }
+    }),
+});
+
+const projects = defineCollection({
+    loader: airtableLoader({
+        base: import.meta.env.AIRTABLE_BASE,
+        table: "projects",
+        queryParams: {
+            view: "all",
         }
     }),
 });
@@ -66,4 +76,4 @@ const technologies = defineCollection({
     }),
 });
 
-export const collections = { guestlog, experience, experience_companies, education, education_providers, projects, technologies };
+export const collections = { guestlog, experience, experience_companies, education, education_providers, favourite_projects, projects, technologies };

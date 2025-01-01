@@ -40,7 +40,7 @@ export function Experience(props: {positions: any, companies: any}) {
                                         <h4 class="text-sm font-semibold">{position.data.type}</h4>
                                         <h4 class="text-sm"><a href={position.data.company.data.link}>{position.data.company.data.name}</a></h4>
                                     </div>
-                                    <div class="text-sm text-gray-500">
+                                    <div class="text-sm">
                                         {`${position.data.start_date.toLocaleString('default', { month: 'long'})} ${position.data.start_date.getFullYear()}`}
                                         - 
                                         {position.data.end_date ? 
