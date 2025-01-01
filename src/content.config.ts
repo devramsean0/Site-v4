@@ -47,4 +47,23 @@ const education_providers = defineCollection({
     }),
 });
 
-export const collections = { guestlog, experience, experience_companies, education, education_providers };
+
+// Projects tables
+const projects = defineCollection({
+     loader: airtableLoader({
+        base: import.meta.env.AIRTABLE_BASE,
+        table: "projects",
+        queryParams: {
+            view: "active",
+        }
+    }),
+});
+
+const technologies = defineCollection({
+    loader: airtableLoader({
+        base: import.meta.env.AIRTABLE_BASE,
+        table: "technologies",
+    }),
+});
+
+export const collections = { guestlog, experience, experience_companies, education, education_providers, projects, technologies };
