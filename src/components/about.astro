@@ -1,16 +1,35 @@
 ---
+import { getCollection } from "astro:content";
+import { Experience } from "./about/experience";
+import { Education } from "./about/education";
+
+const experience_positions = await getCollection("experience");
+const experience_companies = await getCollection("experience_companies");
+
+const education = await getCollection("education");
+const education_providers = await getCollection("education_providers");
 ---
 <section id="about" class="bg-s1 h-screen">
     <h2 class="text-5xl font-bold text-center py-5">About</h2>
-    <div class="flex justify-center py-10 text-2xl">
+    <section class="flex justify-center py-10 text-2xl">
         <p>
             I'm Sean, I'm 16 and have a passion for Computers and Electronics,
             <br />
             I'm currently listening to XX and I'm currently in XX.
             <br />
-            I work for <a href="https://hackclub.com">Hack Club</a>, while also being a Active community member.
+            I work for <a href="https://hackclub.com">Hack Club</a>, while also being a Active community member and moderator.
             <br />
-            I especially enjoy using my current stack of Next.js, TailwindCSS and Vercel. However, I have used Rails in the past. 
+            I especially enjoy using my current stack of Next.js, TailwindCSS and Vercel. However, I have used and enjoyed Rails in the past. 
         </p>
-    </div>
+    </section>
+    <section class="grid grid-cols-2 grid-rows-1 gap-4">
+        <section class="flex flex-col items-center">
+            <h2 class="text-4xl">My Experience</h2>
+            <Experience positions={experience_positions} companies={experience_companies} client:load />
+        </section>
+        <section class="flex flex-col items-center">
+            <h2 class="text-4xl">My Education</h2>
+            <Education education={education} providers={education_providers} client:load/>
+        </section>
+    </section>
 </section>
