@@ -12,7 +12,7 @@ export function GuestlogList(props: {guestlog: any}) {
         }
     }, []);
     return (
-        <div class="grid grid-cols-4 pt-4 gap-5 text-black">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 pt-4 gap-5 text-black">
             {guestlogs().map((guestlog: any) => (
                 <div class="bg-gray-100 p-5 rounded-md">
                     <div class="flex gap-5 items-center">

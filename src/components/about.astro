@@ -22,7 +22,7 @@ const education_providers = await getCollection("education_providers");
             I especially enjoy using my current stack of Next.js, TailwindCSS and Vercel. However, I have used and enjoyed Rails in the past. 
         </p>
     </section>
-    <section class="grid grid-cols-2 grid-rows-1 gap-4">
+    <section class="grid grid-cols-1 lg:grid-cols-2 grid-rows-1 gap-4">
         <section class="flex flex-col items-center">
             <h2 class="text-4xl">My Experience</h2>
             <Experience positions={experience_positions} companies={experience_companies} client:load />
