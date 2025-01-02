@@ -15,4 +15,7 @@
     input, textarea {
         @apply text-black rounded-lg p-2;
     }
+    a {
+        @apply hover:opacity-40 text-blue-500;
+    }
 }

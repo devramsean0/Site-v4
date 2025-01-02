@@ -1,10 +1,17 @@
 ---
 import { Spotify } from "./misc/Spotify";
+import { Image } from "astro:assets";
 
+import DownCaretIcon from "../assets/icons/down-caret.svg";
+import BlueskyLogo from "../assets/social_media/bluesky.svg";
 ---
 <section id="hero" class="h-screen flex flex-col justify-center items-center bg-header text-black">
     <h1 class="text-9xl">Hi!</h1>
-    <div class="flex justify-between absolute bottom-0 text-black">
+    <div class="w-full grid grid-cols-3 grid-rows-1 place-items-center items-end gap-3 absolute bottom-0 text-black">
         <Spotify client:load/>
+        <Image src={DownCaretIcon} alt="Down caret" width="128" height="128" loading="eager" />
+        <div class="flex gap-1 pr-2 pb-2">
+            <a href="https://bsky.app/profile/sean.cyou"><Image src={BlueskyLogo} alt="Bluesky Logo" width="48" height="48" loading="eager"/></a>
+        </div>
     </div>
 </section>
