@@ -3,14 +3,20 @@ import BlankAvatar from "../../assets/no-avatar.jpg";
 
 export function GuestlogList(props: {guestlog: any}) {
     const [guestlogs, setGuestlogs] = createSignal(props.guestlog);
-     createEffect(async () => {
+    const fetch_guestlogs = async () => {
+        const res = await fetch("/api/guestlog");
+        const text = await res.text();
+        setGuestlogs(JSON.parse(text));
+    }
+    createEffect(async () => {
         if (import.meta.env.PROD) {
-            const res = await fetch("/api/guestlog");
-            const text = await res.text();
-            console.log(text);
-            setGuestlogs(JSON.parse(text));
+            await fetch_guestlogs();
         }
     }, []);
+    // Attach event listener to cause reload when new guestlog is submitted
+    document.addEventListener('guestlog:submitted', async () => {
+       await fetch_guestlogs();
+    });
     return (
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 pt-4 gap-5 text-black">
             {guestlogs().map((guestlog: any) => (

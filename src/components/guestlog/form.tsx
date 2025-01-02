@@ -13,6 +13,7 @@ export function GuestlogForm() {
         });
         if (res.ok) {
             form.reset();
+            document.dispatchEvent(new Event('guestlog:submitted'));
         } else {
             alert('Failed to submit');
         }
@@ -34,7 +35,7 @@ export function GuestlogForm() {
             <div>
                 <label for="message">Message</label>
                 <br />
-                <textarea id="message" name="message" required></textarea>
+                <textarea id="message" name="message" class="" required></textarea>
             </div>
             <div>
                 <label for="gravatar_enabled">Use Gravatar? </label>
