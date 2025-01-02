@@ -20,7 +20,7 @@ export function Spotify() {
             });
     });
     return(
-        <div class="[&>*]:text-lg [&>*]:pb-2">
+        <div class="[&>*]:text-lg [&>*]:pb-2 [&>*]:pl-2">
         {playing()
             ? <p>I'm currently listening to <a href={data().songUrl}>{data().title} by {data().artist}</a> on {data().device}</p>
             : <p>I'm not listening to anything rn</p>
