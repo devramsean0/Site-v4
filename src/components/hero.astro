@@ -1,5 +1,10 @@
 ---
+import { Spotify } from "./misc/Spotify";
+
 ---
-<section id="hero" class="h-screen flex justify-center items-center bg-header text-black">
+<section id="hero" class="h-screen flex flex-col justify-center items-center bg-header text-black">
     <h1 class="text-9xl">Hi!</h1>
+    <div class="flex justify-between absolute bottom-0 text-black">
+        <Spotify client:load/>
+    </div>
 </section>
