@@ -12,6 +12,7 @@
     "@ascorbic/airtable-loader": "^1.0.5",
     "@astrojs/check": "^0.9.4",
     "@astrojs/solid-js": "5.0.0",
+    "@astrojs/vercel": "^8.0.1",
     "@types/node": "^22.10.1",
     "astro": "5.0.3",
     "dotenv": "^16.4.7",
