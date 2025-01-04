@@ -76,4 +76,19 @@ const technologies = defineCollection({
     }),
 });
 
-export const collections = { guestlog, experience, experience_companies, education, education_providers, favourite_projects, projects, technologies };
+// Misc Collections
+const kv = defineCollection({
+    loader: airtableLoader({
+        base: import.meta.env.AIRTABLE_BASE,
+        table: "kv",
+    }),
+});
+
+const socials = defineCollection({
+    loader: airtableLoader({
+        base: import.meta.env.AIRTABLE_BASE,
+        table: "socials",
+    }),
+});
+
+export const collections = { guestlog, experience, experience_companies, education, education_providers, favourite_projects, projects, technologies, kv, socials };

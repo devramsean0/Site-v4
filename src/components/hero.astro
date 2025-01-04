@@ -3,9 +3,9 @@ import { Spotify } from "./misc/Spotify";
 import { Image } from "astro:assets";
 
 import DownCaretIcon from "../assets/icons/down-caret.svg";
-import BlueskyLogo from "../assets/social_media/bluesky.svg";
-import GithubLogo from "../assets/social_media/github.svg";
-import CodebergLogo from "../assets/social_media/codeberg.svg";
+import { getCollection } from "astro:content";
+
+const socials = await getCollection("socials");
 ---
 <section id="hero" class="h-screen flex flex-col justify-center items-center bg-header text-black">
     <h1 class="text-9xl">Hi!</h1>
@@ -13,9 +13,9 @@ import CodebergLogo from "../assets/social_media/codeberg.svg";
         <Spotify client:load/>
         <Image src={DownCaretIcon} alt="Down caret" width="128" height="128" loading="eager" />
         <div class="flex gap-1 pr-2 pb-2">
-            <a href="https://github.com/devramsean0"><Image src={GithubLogo} alt="Github Logo" width="48" height="48" loading="eager" /></a>
-            <a href="https://bsky.app/profile/sean.cyou"><Image src={BlueskyLogo} alt="Bluesky Logo" width="48" height="48" loading="eager"/></a>
-            <a href="https://codeberg.com/devramsean0"><Image src={CodebergLogo} alt="Codeberg Logo" width="48" height="48" loading="eager" class="invert-0" /></a>
+            {socials.map((social) => (
+                <a href={social.data.profile_url}><img src={social.data.icon_url} alt={social.data.name} width="48" height="48" loading="eager" /></a>
+            ))}
         </div>
     </div>
 </section>
