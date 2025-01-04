@@ -1,0 +1,43 @@
+---
+import StaticCollectionLookup from "../misc/StaticCollectionLookup.astro";
+import { StaticCollectionLookupF } from "../../lib/StaticCollectionLookupFunction";
+import { getCollection } from "astro:content";
+
+const experience_positions = await getCollection("experience");
+const experience_companies = await getCollection("experience_companies");
+---
+{experience_positions.map((exp) => (
+    <div class="w-full prl-4 py-2">
+        <div class="flex w-full">
+            <img class="h-10 md:w-15 md:h-15 lg:w-20 lg:h-20 mt-6" loading="lazy"
+                src={StaticCollectionLookupF(experience_companies, (exp.data.company as string[])[0], "id", "logo_link")} 
+                alt={`${StaticCollectionLookupF(experience_companies, (exp.data.company as string[])[0], "id", "name")}'s logo`}
+            />
+            <div class="pl-4 w-full">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold">{exp.data.title}</h3>
+                        <h4 class="text-sm font-semibold">{exp.data.type}</h4>
+                        <h4 class="text-sm">
+                            <a
+                                href={StaticCollectionLookupF(experience_companies, (exp.data.company as string[])[0], "id", "link")}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <StaticCollectionLookup collection={experience_companies} lookupValue={(exp.data.company as string[])[0]} resultKey="name"/>
+                            </a>
+                        </h4>
+                    </div>
+                    <p class="text-sm">
+                        {`${exp.data.start_date?.toLocaleString('default', { month: 'long'})} ${exp.data.start_date?.getFullYear()}`}
+                        - 
+                        {exp.data.end_date ? 
+                            `${exp.data.end_date.toLocaleString('default', { month: 'long'})} ${exp.data.end_date.getFullYear()}`
+                        : `Present`}
+                    </p>
+                </div>
+                <p class="invisible md:visible lg:visible">{exp.data.description}</p>
+            </div>
+        </div>
+    </div>
+))}

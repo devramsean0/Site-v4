@@ -1,6 +1,8 @@
 ---
 import { getCollection } from "astro:content";
 import { Image } from "astro:assets";
+import StaticCollectionLookup from "./misc/StaticCollectionLookup.astro";
+import { StaticCollectionLookupF } from "../lib/StaticCollectionLookupFunction";
 
 import CodeIcon from "../assets/icons/code.svg";
 import LinkIcon from "../assets/icons/link.svg";
@@ -47,7 +49,7 @@ const technologies = await getCollection("technologies");
                             <p>{project.data.description}</p>
                             <div class="grid grid-cols-2 gap-3">
                                 {(project.data.technologies as string[]).map((tech) => (
-                                    <p class="p-2 text-white rounded-lg text-center" style={{backgroundColor: technologies.find((data) => data.id == tech)?.data.colour}}>{technologies.find((data) => data.id == tech)?.data.id}</p>
+                                    <p class="p-2 text-white rounded-lg text-center" style={{backgroundColor: StaticCollectionLookupF(technologies, tech, "id", "colour")}}><StaticCollectionLookup collection={technologies} lookupValue={tech} resultKey="id"/></p>
                                 ))}
                             </div>
                         </div>

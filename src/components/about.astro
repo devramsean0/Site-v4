@@ -1,13 +1,7 @@
 ---
-import { getCollection } from "astro:content";
-import { Experience } from "./about/experience";
-import { Education } from "./about/education";
+import Experience from "./about/experience.astro";
+import Education from "./about/education.astro";
 
-const experience_positions = await getCollection("experience");
-const experience_companies = await getCollection("experience_companies");
-
-const education = await getCollection("education");
-const education_providers = await getCollection("education_providers");
 ---
 <section id="about" class="bg-s1 min-h-screen max-h-fit">
     <h2 class="text-5xl font-bold text-center py-5">About</h2>
@@ -25,11 +19,11 @@ const education_providers = await getCollection("education_providers");
     <section class="grid grid-cols-1 lg:grid-cols-2 grid-rows-1 gap-4">
         <section class="flex flex-col items-center">
             <h2 class="text-4xl">My Experience</h2>
-            <Experience positions={experience_positions} companies={experience_companies} client:load />
+            <Experience />
         </section>
         <section class="flex flex-col items-center">
             <h2 class="text-4xl">My Education</h2>
-            <Education education={education} providers={education_providers} client:load/>
+            <Education />
         </section>
     </section>
 </section>
