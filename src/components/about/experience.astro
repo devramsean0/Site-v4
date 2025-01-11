@@ -6,7 +6,9 @@ import { getCollection } from "astro:content";
 const experience_positions = await getCollection("experience");
 const experience_companies = await getCollection("experience_companies");
 ---
-{experience_positions.map((exp) => (
+{experience_positions.sort((a, b) => {
+    return (b.data.start_date?.getTime() ?? 0) - (a.data.start_date?.getTime() ?? 0);
+}).map((exp) => (
     <div class="w-full prl-4 py-2">
         <div class="flex w-full">
             <img class="h-10 md:w-15 md:h-15 lg:w-20 lg:h-20" style={{
