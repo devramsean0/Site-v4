@@ -7,7 +7,7 @@ export const GET: APIRoute = async ({ request }) => {
     const player = await getPlayer();
 
     if (player.status === 204 || player.status > 400) {
-        console.log('Fetching failed due to status', player.status, await player.json());
+        console.log('Fetching failed due to status', player.status);
         return new Response(JSON.stringify({ playing: false }));
     }
     const song = await player.json();

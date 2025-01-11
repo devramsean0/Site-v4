@@ -9,7 +9,9 @@ const experience_companies = await getCollection("experience_companies");
 {experience_positions.map((exp) => (
     <div class="w-full prl-4 py-2">
         <div class="flex w-full">
-            <img class="h-10 md:w-15 md:h-15 lg:w-20 lg:h-20 mt-6" loading="lazy"
+            <img class="h-10 md:w-15 md:h-15 lg:w-20 lg:h-20" style={{
+                marginTop: StaticCollectionLookupF(experience_companies, (exp.data.company as string[])[0], "id", "logo_offset_top"),
+            }} loading="lazy"
                 src={StaticCollectionLookupF(experience_companies, (exp.data.company as string[])[0], "id", "logo_link")} 
                 alt={`${StaticCollectionLookupF(experience_companies, (exp.data.company as string[])[0], "id", "name")}'s logo`}
             />
