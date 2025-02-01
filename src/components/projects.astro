@@ -24,7 +24,7 @@ const technologies = await getCollection("technologies");
         </div>
         <div class="flex flex-col gap-2">
             {technologies.map((tech) => (
-                <div class="p-1 rounded-full border-white border-2" style={{backgroundColor: tech.data.colour, width: `${100 / all_projects.length * (tech.data.projects as string[]).length}%`}}>
+                <div class="p-1 rounded-full border-white border-2 min-w-fit" style={{backgroundColor: tech.data.colour, width: `${100 / all_projects.length * (tech.data.projects as string[]).length}%`}}>
                     <h2 class="pl-4 text-2xl">{tech.data.id}: {(tech.data.projects as string[]).length}</h2>
                 </div>
             ))}

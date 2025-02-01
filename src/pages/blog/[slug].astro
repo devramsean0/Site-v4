@@ -1,0 +1,30 @@
+---
+import "../../index.css"
+
+import { getCollection } from "astro:content";
+import { getEntry } from "astro:content";
+import GeneralLayout from "../../layouts/generalLayout.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog_posts");
+  return posts.map((post) => ({
+		params: { slug: post.id },
+		props: post,
+	}));
+}
+
+const post = Astro.props;
+---
+<GeneralLayout
+	title={post.data.title}>
+	<main class="text-black">
+		<section class="flex flex-row gap-3 p-3 justify-between content-center">
+			<h2 class="text-xl">{post.data.published_at ? post.data.published_at.toLocaleDateString(["en-gb"]) : "Not published yet!"}</h2>
+			<h2 class="text-2xl">{post.data.title}</h2>
+			<h2 class="text-xl">Viewed ?? times</h2>
+		</section>
+		<article class="prose lg:prose-xl">
+
+		</article>
+	</main>
+</GeneralLayout>

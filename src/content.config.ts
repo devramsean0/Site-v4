@@ -1,6 +1,6 @@
 import { defineCollection, z } from 'astro:content';
 import { airtableLoader } from '@ascorbic/airtable-loader';
-
+import { glob } from 'astro/loaders';
 // Guestlog tables
 const guestlog = defineCollection({
     loader: airtableLoader({
@@ -91,4 +91,17 @@ const socials = defineCollection({
     }),
 });
 
-export const collections = { guestlog, experience, experience_companies, education, education_providers, favourite_projects, projects, technologies, kv, socials };
+// Blog Collections
+const blog_posts = defineCollection({
+    loader: glob({
+        pattern: "**/*.md",
+        base: "content/blog"
+    }),
+    schema: z.object({
+        title: z.string(),
+        description: z.string(),
+        published_at: z.optional(z.date()),
+        tags: z.optional(z.array(z.string()))
+    })
+});
+export const collections = { guestlog, experience, experience_companies, education, education_providers, favourite_projects, projects, technologies, kv, socials, blog_posts };
