@@ -1,5 +1,6 @@
 import { defineCollection, z } from 'astro:content';
 import { airtableLoader } from '@ascorbic/airtable-loader';
+import { s3Loader } from './lib/s3-loader';
 
 // Guestlog tables
 const guestlog = defineCollection({
@@ -83,6 +84,19 @@ const gallery = defineCollection({
     }),
 });
 
+const gallery_photos = defineCollection({
+    loader: s3Loader({
+        endpoint: import.meta.env.S3_ENDPOINT,
+        bucket: "sean-photos-public",
+        auth: {
+            key_id: import.meta.env.S3_KEY_ID,
+            access_key: import.meta.env.S3_ACCESS_KEY
+        }
+    }),
+    schema: z.object({
+        data: z.object({}),
+    }),
+})
 // Misc Collections
 const kv = defineCollection({
     loader: airtableLoader({
@@ -98,4 +112,4 @@ const socials = defineCollection({
     }),
 });
 
-export const collections = { guestlog, experience, experience_companies, education, education_providers, favourite_projects, projects, technologies, gallery, kv, socials };
+export const collections = { guestlog, experience, experience_companies, education, education_providers, favourite_projects, projects, technologies, gallery, gallery_photos, kv, socials };
