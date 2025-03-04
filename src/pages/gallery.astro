@@ -1,0 +1,35 @@
+---
+import { getCollection } from "astro:content";
+import { MapPin, Camera, Calendar } from "lucide-solid";
+
+import Layout from "../components/meta/layout.astro";
+
+const gallery = await getCollection("gallery");
+
+---
+<Layout title="Gallery" extra_classes="bg-s1">
+    <section class="flex flex-col items-center">
+        <h1 class="text-5xl font-bold text-center py-5">Gallery</h1>
+        <p>
+            I take many photos when I'm out and about, Below are a selection of my favorites and bits of metadata about them.
+            ALL Images on this page are &copy; Sean Outram. All Rights Reserved.
+        </p>
+    </section>
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 pt-4 mx-2 gap-5 text-black">
+        {gallery.map((photo) => (
+            <div class="bg-gray-100 p-5 rounded-md">
+                <div class="flex flex-col gap-3 justify-between h-full">
+                    <img src={String(photo.data.complete_path)} alt={photo.data.title} class="rounded-lg object-fill" />
+                    <div class="flex flex-col items-center">
+                        <h3 class="text-3xl">{photo.data.title}</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <p class="flex items-center gap-2"><Calendar size="28" /> {photo.data.date?.toLocaleString("en") }</p>
+                            <p class="flex items-center gap-2"><MapPin size="28"/> {photo.data.location}</p>
+                            <p class="flex items-center gap-2"><Camera size="28"/> {photo.data.camera}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        ))}
+    </section>
+</Layout>
