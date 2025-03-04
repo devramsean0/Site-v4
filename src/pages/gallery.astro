@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import { MapPin, Camera, Calendar } from "lucide-solid";
 
 import Layout from "../components/meta/layout.astro";
+import { FormatDateTime } from "../lib/date";
 
 const gallery = await getCollection("gallery");
 
@@ -23,7 +24,7 @@ const gallery = await getCollection("gallery");
                     <div class="flex flex-col items-center">
                         <h3 class="text-3xl">{photo.data.title}</h3>
                         <div class="grid grid-cols-2 gap-2">
-                            <p class="flex items-center gap-2"><Calendar size="28" /> {photo.data.date?.toLocaleString("en") }</p>
+                            <p class="flex items-center gap-2"><Calendar size="28" /> {new Date(`${FormatDateTime(photo.data.date ?? new Date())} ${photo.data.photo_timezone}`)?.toUTCString()}</p>
                             <p class="flex items-center gap-2"><MapPin size="28"/> {photo.data.location}</p>
                             <p class="flex items-center gap-2"><Camera size="28"/> {photo.data.camera}</p>
                         </div>
