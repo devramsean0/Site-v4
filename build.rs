@@ -1,7 +1,9 @@
 use std::process::Command;
 
 fn main() {
-    Command::new("tailwindcss")
+    println!("cargo::rerun-if-changed=src/js");
+    println!("cargo::rerun-if-changed=src/css");
+    let tailwind = Command::new("tailwindcss")
         .args([
             "-i",
             "src/css/tailwind.css",
@@ -10,9 +12,10 @@ fn main() {
         ])
         .output()
         .expect("Failed to build tailwindcss");
-
-    Command::new("bun")
+    println!("cargo::warning=Tailwind Status: {}", tailwind.status);
+    let bun = Command::new("bun")
         .args(["scripts/bundle-js.ts"])
         .output()
         .expect("failed to build JS");
+    println!("cargo::warning=Bun Status: {}", bun.status);
 }
