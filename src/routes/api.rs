@@ -1,5 +1,6 @@
 use actix_web::{get, http::StatusCode, HttpResponse};
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 static PLAYER_ENDPOINT: &'static str = "https://api.spotify.com/v1/me/player?market=GB";
 static TOKEN_ENDPOINT: &'static str = "https://accounts.spotify.com/api/token";
 
@@ -51,7 +52,15 @@ pub async fn api_spotify_get() -> HttpResponse {
                 .await;
             match spotify_player_res {
                 Ok(player_res) => {
-                    let player = player_res.json::<serde_json::Value>().await.unwrap();
+                    let player =
+                        player_res
+                            .json::<serde_json::Value>()
+                            .await
+                            .unwrap_or_else(|_| {
+                                json!({
+                                    "is_playing": false
+                                })
+                            });
                     if player.get("is_playing").unwrap().as_bool().unwrap_or(false) {
                         log::debug!("Spotify: Currently playing");
                         let item = player.get("item").unwrap_or(&serde_json::Value::Null);
