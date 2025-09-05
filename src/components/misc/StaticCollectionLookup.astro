@@ -1,8 +1,0 @@
----
-import { StaticCollectionLookupF } from "../../lib/StaticCollectionLookupFunction";
-
-// This is a small component that abstracts away the filtering logic - So that multi collection stuff can be fully static
-// This is equivalent to the pure TS function in lib - but can actually render in Astro
-const { collection, lookupValue, lookupKey = "id", resultKey } = Astro.props;
----
-{StaticCollectionLookupF(collection, lookupValue, lookupKey, resultKey)}
