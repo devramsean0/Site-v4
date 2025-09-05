@@ -20,6 +20,8 @@
           bacon
           scc
           tailwindcss_4
+          pkg-config
+          openssl
           # config.process-compose.cargo-doc-live.outputs.package
         ];
       };

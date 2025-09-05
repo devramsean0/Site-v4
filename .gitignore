@@ -4,3 +4,6 @@
 .direnv
 
 /.pre-commit-config.yaml
+.env
+compiled_assets/
+*.sqlite3
