@@ -1,0 +1,16 @@
+{
+  "name": "site-v4",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@hotwired/stimulus": "^3.2.2",
+    "bun-stimulus-plugin": "^3.0.0"
+  }
+}

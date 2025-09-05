@@ -22,6 +22,7 @@
           tailwindcss_4
           pkg-config
           openssl
+          bun
           # config.process-compose.cargo-doc-live.outputs.package
         ];
       };

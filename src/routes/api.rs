@@ -1,5 +1,5 @@
 use actix_web::{get, http::StatusCode, HttpResponse};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 static PLAYER_ENDPOINT: &'static str = "https://api.spotify.com/v1/me/player?market=GB";
 static TOKEN_ENDPOINT: &'static str = "https://accounts.spotify.com/api/token";
 
@@ -54,7 +54,66 @@ pub async fn api_spotify_get() -> HttpResponse {
                     let player = player_res.json::<serde_json::Value>().await.unwrap();
                     if player.get("is_playing").unwrap().as_bool().unwrap_or(false) {
                         log::debug!("Spotify: Currently playing");
-                        return HttpResponse::Ok().status(StatusCode::OK).finish();
+                        let item = player.get("item").unwrap_or(&serde_json::Value::Null);
+                        let title = item
+                            .get("name")
+                            .and_then(|v| v.as_str())
+                            .unwrap_or("")
+                            .to_string();
+                        let artists = item
+                            .get("artists")
+                            .and_then(|v| v.as_array())
+                            .map(|arr| {
+                                arr.iter()
+                                    .filter_map(|a| {
+                                        a.get("name")
+                                            .and_then(|n| n.as_str())
+                                            .map(|s| s.to_string())
+                                    })
+                                    .collect::<Vec<_>>()
+                            })
+                            .unwrap_or_default();
+                        let album = item
+                            .get("album")
+                            .and_then(|a| a.get("name"))
+                            .and_then(|v| v.as_str())
+                            .unwrap_or("")
+                            .to_string();
+                        let album_image_url = item
+                            .get("album")
+                            .and_then(|a| a.get("images"))
+                            .and_then(|imgs| imgs.as_array())
+                            .and_then(|arr| arr.get(0))
+                            .and_then(|img| img.get("url"))
+                            .and_then(|v| v.as_str())
+                            .unwrap_or("")
+                            .to_string();
+                        let song_url = item
+                            .get("external_urls")
+                            .and_then(|urls| urls.get("spotify"))
+                            .and_then(|v| v.as_str())
+                            .unwrap_or("")
+                            .to_string();
+                        let device = player
+                            .get("device")
+                            .and_then(|d| d.get("name"))
+                            .and_then(|v| v.as_str())
+                            .unwrap_or("")
+                            .to_string();
+
+                        return HttpResponse::Ok().json(SpotifyNowPlaying {
+                            is_playing: player
+                                .get("is_playing")
+                                .unwrap()
+                                .as_bool()
+                                .unwrap_or(false),
+                            title,
+                            artists,
+                            album,
+                            album_image_url,
+                            song_url,
+                            device,
+                        });
                     } else {
                         log::debug!("Spotify: Nothing is playing");
                         return HttpResponse::Ok().status(StatusCode::NO_CONTENT).finish();
@@ -85,4 +144,15 @@ struct SpotifyRefreshTokenRes {
     expires_in: i64,
     refresh_token: Option<String>,
     scope: String,
+}
+
+#[derive(Serialize, Debug)]
+struct SpotifyNowPlaying {
+    is_playing: bool,
+    title: String,
+    artists: Vec<String>,
+    album: String,
+    album_image_url: String,
+    song_url: String,
+    device: String,
 }

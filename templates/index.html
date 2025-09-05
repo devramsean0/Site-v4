@@ -3,8 +3,8 @@
 {% block content %}
 <header class="h-screen flex flex-col justify-center items-center bg-header text-black">
     <h1 class="text-9xl">Hi!</h1>
-    <div class="w-full grid-cols-3 grid-rows-1 place-items-center items-end gap-3 absolute bottom-0 text-black">
-        <p id="spotify-widget">Loading...</p>
+    <div class="w-full grid grid-cols-3 grid-rows-1 place-items-center items-end gap-3 absolute bottom-0 text-black">
+        <p data-controller="spotify" data-spotify-target="output">Loading...</p>
         <img src="/assets/icon/down-caret.svg" alt="Down Caret Icon" width="128" height="128" loading="eager" />
     </div>
 </header>

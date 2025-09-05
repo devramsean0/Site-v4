@@ -48,7 +48,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::Logger::default())
             .service(Files::new("compiled_assets/", "compiled_assets/"))
             .service(Files::new("assets/", "assets/"))
-            .app_data(web::Data::new(db_pool_arc.clone()))
+            //.app_data(web::Data::new(db_pool_arc.clone()))
             .service(routes::index::index_get)
             .service(routes::api::api_spotify_get)
     })

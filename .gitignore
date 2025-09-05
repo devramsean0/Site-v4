@@ -1,9 +1,10 @@
 /target
 /result
 /result-lib
+/compiled_assets
+/node_modules
 .direnv
 
 /.pre-commit-config.yaml
 .env
-compiled_assets/
 *.sqlite3
