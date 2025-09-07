@@ -7,6 +7,7 @@
     <div class="w-full grid grid-cols-3 grid-rows-1 place-items-center items-end gap-3 absolute bottom-0 text-black">
         <div data-controller="spotify" data-action="wsmessage@document->spotify#recieved" data-spotify-target="output"
             class="m-4 flex flex-col w-full items-start">
+            {{spotify_widget|safe}}
         </div>
         <img src="/assets/icon/down-caret.svg" alt="Down Caret Icon" width="128" height="128" loading="eager" />
     </div>

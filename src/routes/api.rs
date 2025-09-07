@@ -1,11 +1,12 @@
 use actix_web::{get, http::StatusCode, web, HttpRequest, HttpResponse};
 use askama::Template;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use serde_json::json;
 
 use crate::{
     templates::SpotifyPartTemplate,
     websocket_channel::{ChannelsActor, Publish},
+    AppState,
 };
 static PLAYER_ENDPOINT: &'static str = "https://api.spotify.com/v1/me/player?market=GB";
 static TOKEN_ENDPOINT: &'static str = "https://accounts.spotify.com/api/token";
@@ -21,6 +22,7 @@ static APP_USER_AGENT: &str = concat!(
 pub async fn api_spotify_get(
     request: HttpRequest,
     channels: web::Data<actix::Addr<ChannelsActor>>,
+    state: web::Data<AppState>,
 ) -> HttpResponse {
     let spotify_client_id = std::env::var("SPOTIFY_CLIENT_ID").unwrap_or_else(|_| "".to_string());
     let spotify_client_secret =
@@ -28,14 +30,14 @@ pub async fn api_spotify_get(
     let spotify_refresh_token =
         std::env::var("SPOTIFY_REFRESH_TOKEN").unwrap_or_else(|_| "".to_string());
     let api_update_token =
-        std::env::var("API_UPDATE_TOKEN").unwrap_or_else(|_| "Bearer beans".to_string());
+        std::env::var("API_UPDATE_TOKEN").unwrap_or_else(|_| "beans".to_string());
     if request
         .headers()
         .get(actix_web::http::header::AUTHORIZATION)
         .unwrap()
         .to_str()
         .unwrap_or_default()
-        != api_update_token.as_str()
+        != format!("Bearer {api_update_token}").as_str()
     {
         return HttpResponse::Ok().status(StatusCode::UNAUTHORIZED).finish();
     }
@@ -144,15 +146,33 @@ pub async fn api_spotify_get(
                         .expect("Template should be valid");
                         channels.do_send(Publish {
                             channel: "spotify".to_string(),
-                            payload: html.to_string(),
+                            payload: html.clone().to_string(),
                         });
-                        return HttpResponse::Ok().status(StatusCode::NO_CONTENT).finish();
+                        match state
+                            .store
+                            .lock()
+                            .unwrap()
+                            .insert("spotify".to_string(), html.clone())
+                        {
+                            None => log::debug!("KV value updated"),
+                            Some(_) => log::debug!("KV value created"),
+                        };
+                        return HttpResponse::Ok().status(StatusCode::OK).body(html);
                     } else {
                         log::debug!("Spotify: Nothing is playing");
                         channels.do_send(Publish {
                             channel: "spotify".to_string(),
                             payload: String::new(),
                         });
+                        match state
+                            .store
+                            .lock()
+                            .unwrap()
+                            .insert("spotify".to_string(), String::new())
+                        {
+                            None => log::debug!("KV value updated"),
+                            Some(_) => log::debug!("KV value created"),
+                        };
                         return HttpResponse::Ok().status(StatusCode::NO_CONTENT).finish();
                     }
                 }
@@ -162,6 +182,15 @@ pub async fn api_spotify_get(
                         channel: "spotify".to_string(),
                         payload: String::new(),
                     });
+                    match state
+                        .store
+                        .lock()
+                        .unwrap()
+                        .insert("spotify".to_string(), String::new())
+                    {
+                        None => log::debug!("KV value updated"),
+                        Some(_) => log::debug!("KV value created"),
+                    };
                     return HttpResponse::Ok()
                         .status(StatusCode::INTERNAL_SERVER_ERROR)
                         .finish();
@@ -185,15 +214,4 @@ struct SpotifyRefreshTokenRes {
     expires_in: i64,
     refresh_token: Option<String>,
     scope: String,
-}
-
-#[derive(Serialize, Debug)]
-struct SpotifyNowPlaying {
-    is_playing: bool,
-    title: String,
-    artists: Vec<String>,
-    album: String,
-    album_image_url: String,
-    song_url: String,
-    device: String,
 }

@@ -7,7 +7,6 @@ export default class extends Controller {
 
     recieved(event: any) {
         if (event.detail.channel != "spotify") return
-        console.log(`Spotify Update: ${event.detail.data}`)
         this.outputTarget.innerHTML = event.detail.data;
     }
 }

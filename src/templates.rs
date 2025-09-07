@@ -4,6 +4,7 @@ use askama::Template;
 #[template(path = "index.html")]
 pub struct IndexTemplate<'a> {
     pub title: &'a str,
+    pub spotify_widget: String,
 }
 
 #[derive(Template)]

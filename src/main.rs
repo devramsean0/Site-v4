@@ -3,8 +3,10 @@ use actix_files::Files;
 use actix_web::{middleware, web, App, HttpServer};
 use async_sqlite::PoolBuilder;
 use std::{
+    cell::Cell,
+    collections::HashMap,
     io::{Error, ErrorKind},
-    sync::Arc,
+    sync::{Arc, Mutex},
 };
 
 use crate::websocket_channel::ChannelsActor;
@@ -61,6 +63,10 @@ async fn main() -> std::io::Result<()> {
         workers::spotify::register(ctrl_c).await.unwrap();
     });
 
+    let state = web::Data::new(AppState {
+        store: Mutex::new(HashMap::new()),
+    });
+
     let server = HttpServer::new(move || {
         App::new()
             .wrap(middleware::Logger::default())
@@ -68,6 +74,7 @@ async fn main() -> std::io::Result<()> {
             .service(Files::new("assets/", "assets/"))
             .app_data(web::Data::new(db_pool_arc.clone()))
             .app_data(web::Data::new(ws_channels.clone()))
+            .app_data(state.clone())
             .service(routes::index::index_get)
             .service(routes::ws::ws_route)
             .service(routes::api::api_spotify_get)
@@ -81,4 +88,8 @@ async fn main() -> std::io::Result<()> {
     log::info!("Spotify Worker shutdown");
 
     Ok(())
+}
+
+struct AppState {
+    store: Mutex<HashMap<String, String>>,
 }
