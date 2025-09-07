@@ -1,6 +1,12 @@
-use actix_web::{get, http::StatusCode, HttpResponse};
+use actix_web::{get, http::StatusCode, web, HttpRequest, HttpResponse};
+use askama::Template;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+
+use crate::{
+    templates::SpotifyPartTemplate,
+    websocket_channel::{ChannelsActor, Publish},
+};
 static PLAYER_ENDPOINT: &'static str = "https://api.spotify.com/v1/me/player?market=GB";
 static TOKEN_ENDPOINT: &'static str = "https://accounts.spotify.com/api/token";
 
@@ -12,13 +18,27 @@ static APP_USER_AGENT: &str = concat!(
 );
 
 #[get("/api/spotify")]
-pub async fn api_spotify_get() -> HttpResponse {
+pub async fn api_spotify_get(
+    request: HttpRequest,
+    channels: web::Data<actix::Addr<ChannelsActor>>,
+) -> HttpResponse {
     let spotify_client_id = std::env::var("SPOTIFY_CLIENT_ID").unwrap_or_else(|_| "".to_string());
     let spotify_client_secret =
         std::env::var("SPOTIFY_CLIENT_SECRET").unwrap_or_else(|_| "".to_string());
     let spotify_refresh_token =
         std::env::var("SPOTIFY_REFRESH_TOKEN").unwrap_or_else(|_| "".to_string());
-
+    let api_update_token =
+        std::env::var("API_UPDATE_TOKEN").unwrap_or_else(|_| "Bearer beans".to_string());
+    if request
+        .headers()
+        .get(actix_web::http::header::AUTHORIZATION)
+        .unwrap()
+        .to_str()
+        .unwrap_or_default()
+        != api_update_token.as_str()
+    {
+        return HttpResponse::Ok().status(StatusCode::UNAUTHORIZED).finish();
+    }
     let basic_auth =
         base64::encode(format!("{spotify_client_id}:{spotify_client_secret}").as_str());
 
@@ -82,6 +102,8 @@ pub async fn api_spotify_get() -> HttpResponse {
                                     .collect::<Vec<_>>()
                             })
                             .unwrap_or_default();
+                        let is_playing =
+                            player.get("is_playing").unwrap().as_bool().unwrap_or(false);
                         let album = item
                             .get("album")
                             .and_then(|a| a.get("name"))
@@ -109,27 +131,37 @@ pub async fn api_spotify_get() -> HttpResponse {
                             .and_then(|v| v.as_str())
                             .unwrap_or("")
                             .to_string();
-
-                        return HttpResponse::Ok().json(SpotifyNowPlaying {
-                            is_playing: player
-                                .get("is_playing")
-                                .unwrap()
-                                .as_bool()
-                                .unwrap_or(false),
-                            title,
+                        let html = SpotifyPartTemplate {
+                            is_playing,
                             artists,
+                            title,
                             album,
                             album_image_url,
                             song_url,
                             device,
+                        }
+                        .render()
+                        .expect("Template should be valid");
+                        channels.do_send(Publish {
+                            channel: "spotify".to_string(),
+                            payload: html.to_string(),
                         });
+                        return HttpResponse::Ok().status(StatusCode::NO_CONTENT).finish();
                     } else {
                         log::debug!("Spotify: Nothing is playing");
+                        channels.do_send(Publish {
+                            channel: "spotify".to_string(),
+                            payload: String::new(),
+                        });
                         return HttpResponse::Ok().status(StatusCode::NO_CONTENT).finish();
                     }
                 }
                 Err(err) => {
                     log::error!("Failed to fetch spotify player: {err}");
+                    channels.do_send(Publish {
+                        channel: "spotify".to_string(),
+                        payload: String::new(),
+                    });
                     return HttpResponse::Ok()
                         .status(StatusCode::INTERNAL_SERVER_ERROR)
                         .finish();

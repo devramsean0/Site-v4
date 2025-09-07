@@ -5,3 +5,15 @@ use askama::Template;
 pub struct IndexTemplate<'a> {
     pub title: &'a str,
 }
+
+#[derive(Template)]
+#[template(path = "parts/spotify.html")]
+pub struct SpotifyPartTemplate {
+    pub is_playing: bool,
+    pub title: String,
+    pub artists: Vec<String>,
+    pub album: String,
+    pub album_image_url: String,
+    pub song_url: String,
+    pub device: String,
+}

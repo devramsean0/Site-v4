@@ -1,0 +1,12 @@
+{% if is_playing == true -%}
+<div class="ml-2 p-4 bg-gray-700/20 rounded-lg">
+    <div>
+        <a href="{{song_url}}" class="flex flex-row items-center gap-2 text-wrap">
+            <img src="{{album_image_url}}" alt='{{title}} by {{artists.join(", ")}}' width=128 height=128 />
+            <p>I'm listening to {{title}} by {{artists.join(", ")}} on {{device}} </p>
+        </a>
+    </div>
+    {% else -%}
+    <p>I'm not playing anything</p>
+    {% endif -%}
+</div>

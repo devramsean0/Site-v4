@@ -1,3 +1,4 @@
+use actix::{Actor, Addr};
 use actix_files::Files;
 use actix_web::{middleware, web, App, HttpServer};
 use async_sqlite::PoolBuilder;
@@ -6,9 +7,14 @@ use std::{
     sync::Arc,
 };
 
+use crate::websocket_channel::ChannelsActor;
+
 mod db;
 mod routes;
 mod templates;
+mod utils;
+mod websocket_channel;
+mod workers;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -43,16 +49,36 @@ async fn main() -> std::io::Result<()> {
 
     let db_pool_arc = Arc::new(pool.clone());
 
-    HttpServer::new(move || {
+    let ws_channels: Addr<ChannelsActor> = ChannelsActor::new().start();
+    let (s, ctrl_c) = async_channel::bounded(1);
+    let handle = move || {
+        s.try_send(()).ok();
+    };
+    ctrlc::set_handler(handle).unwrap();
+
+    // Spawn spotify worker after server has started
+    let spotify_worker = tokio::spawn(async move {
+        workers::spotify::register(ctrl_c).await.unwrap();
+    });
+
+    let server = HttpServer::new(move || {
         App::new()
             .wrap(middleware::Logger::default())
             .service(Files::new("compiled_assets/", "compiled_assets/"))
             .service(Files::new("assets/", "assets/"))
             .app_data(web::Data::new(db_pool_arc.clone()))
+            .app_data(web::Data::new(ws_channels.clone()))
             .service(routes::index::index_get)
+            .service(routes::ws::ws_route)
             .service(routes::api::api_spotify_get)
     })
     .bind((host.clone(), port))?
-    .run()
-    .await
+    .run();
+
+    server.await.unwrap();
+
+    spotify_worker.await.unwrap();
+    log::info!("Spotify Worker shutdown");
+
+    Ok(())
 }

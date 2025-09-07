@@ -3,6 +3,7 @@ use std::process::Command;
 fn main() {
     println!("cargo::rerun-if-changed=src/js");
     println!("cargo::rerun-if-changed=src/css");
+    println!("cargo::rerun-if-changed=templates");
     let tailwind = Command::new("tailwindcss")
         .args([
             "-i",

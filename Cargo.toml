@@ -9,14 +9,20 @@ version = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+actix = "0.13.5"
 actix-files = "0.6.7"
 actix-session = { version = "0.11.0", features = ["cookie-session"] }
 actix-web = "4.11.0"
+actix-web-actors = "4.3.1"
 anyhow = "1.0.99"
+apalis = { version = "0.7.3", features = ["retry"] }
+apalis-cron = "0.7.3"
 askama = "0.14.0"
+async-channel = "2.5.0"
 async-sqlite = "0.5.3"
 base64 = "0.22.1"
 chrono = "0.4.41"
+ctrlc = "3.4.7"
 dotenv = "0.15.0"
 env_logger = "0.11.8"
 log = "0.4.28"
@@ -25,3 +31,4 @@ rusqlite = "0.37.0"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.143"
 tokio = { version = "1.47.1", features = ["macros", "rt-multi-thread"] }
+tokio-util = "0.7.16"
