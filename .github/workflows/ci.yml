@@ -15,3 +15,18 @@ jobs:
         run: nix develop --command bun install
       - name: Run Release Cargo Build
         run: nix develop --command cargo build --release
+  build:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: devramsean0
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Docker image
+        run: docker build -t ghcr.io/devramsean0/site-v4:latest .
+      - name: Push Docker image
+        run: docker push ghcr.io/devramsean0/site-v4:latest
