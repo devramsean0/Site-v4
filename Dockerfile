@@ -34,4 +34,5 @@ COPY --from=build /app/assets /app/assets
 COPY --from=build /app/templates /app/templates
 COPY --from=build /app/compiled_assets /app/compiled_assets
 
+EXPOSE 3000
 CMD ["/app/site-v4"]
