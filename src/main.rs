@@ -78,6 +78,7 @@ async fn main() -> std::io::Result<()> {
             .service(routes::index::index_get)
             .service(routes::ws::ws_route)
             .service(routes::api::api_spotify_get)
+            .service(routes::admin::authentication::admin_login_get)
     })
     .bind((host.clone(), port))?
     .run();

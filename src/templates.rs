@@ -18,3 +18,10 @@ pub struct SpotifyPartTemplate {
     pub song_url: String,
     pub device: String,
 }
+
+#[derive(Template)]
+#[template(path = "admin/login.html")]
+pub struct AdminLoginTemplate<'a> {
+    pub title: &'a str,
+    pub error: Option<&'a str>,
+}

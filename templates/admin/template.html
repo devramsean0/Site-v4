@@ -1,0 +1,11 @@
+{% extends "../base.html" %}
+{% block content %}
+<main class="bg-gray-900 text-white h-screen w-screen">
+    {% if let Some(error) = error %}
+    <div class="bg-red-600 text-white">
+        {{ error }}
+    </div>
+    {% endif %}
+    {% block admincontent %}{% endblock %}
+</main>
+{%endblock content%}
