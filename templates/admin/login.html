@@ -3,14 +3,15 @@
 <section class="flex flex-col justify-center items-center h-full">
     <div class="border-2 border-white p-4 rounded-lg">
         <h1 class="text-2xl">Sign In</h1>
-        <form action="/admin/login" class="flex flex-col gap-2">
+        <form action="/admin/login" method="post" class="flex flex-col gap-2">
             <div class="flex flex-col">
                 <label for="email">Enter your Email address:</label>
-                <input type="email" id="email" required class="border-1 border-white p-1 rounded-md" />
+                <input name="email" type="email" id="email" required class="border-1 border-white p-1 rounded-md" />
             </div>
             <div class="flex flex-col">
                 <label for="password">Enter your Password:</label>
-                <input type="password" id="password" required class="border-1 border-white p-1 rounded-md" />
+                <input name="password" type="password" id="password" required
+                    class="border-1 border-white p-1 rounded-md" />
             </div>
             <button class="bg-white p-1 text-black w-full" type="submit">Submit</button>
         </form>
