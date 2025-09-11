@@ -45,6 +45,6 @@ jobs:
       - name: Update container
         run: |
           tailscale ssh sean@scipio \
-          cd sitev4 && \
-          docker compose down && \
-          docker compose up --pull always
+          cd sitev4 \
+          && docker compose down \
+          && docker compose up --pull always
