@@ -5,4 +5,5 @@ await Bun.build({
     outdir: "compiled_assets/js",
     plugins: [bunStimulusPlugin()],
     minify: true,
+    env: "PUBLIC_*"
 })

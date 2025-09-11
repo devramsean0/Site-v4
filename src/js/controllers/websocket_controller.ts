@@ -7,7 +7,7 @@ export default class extends Controller {
 
     override connect() {
         const channel = this.channelValue
-        this.ws = new WebSocket(`wss://${location.host}/ws/${channel}`)
+        this.ws = new WebSocket(`${process.env.PUBLIC_PRODUCTION ? "wss" : "ws"}://${location.host}/ws/${channel}`)
 
         this.ws.onmessage = (event) => {
             console.log(`${channel}: Recieved ${event.data}`)
