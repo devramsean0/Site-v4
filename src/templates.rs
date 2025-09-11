@@ -25,3 +25,10 @@ pub struct AdminLoginTemplate<'a> {
     pub title: &'a str,
     pub error: Option<&'a str>,
 }
+
+#[derive(Template)]
+#[template(path = "admin/experience/list.html")]
+pub struct AdminExperienceListTemplate<'a> {
+    pub title: &'a str,
+    pub error: Option<&'a str>,
+}

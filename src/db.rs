@@ -23,8 +23,8 @@ pub async fn create_tables(pool: &Pool) -> Result<(), async_sqlite::Error> {
         conn.execute(
             "CREATE TABLE IF NOT EXISTS admin_session (
                 session TEXT PRIMARY KEY,
-                created_at INTEGER  NOT NULL,
-                updated_at INTEGER  NOT NULL
+                created_at TEXT  NOT NULL,
+                updated_at TEXT  NOT NULL
             )",
             [],
         )
@@ -86,6 +86,13 @@ impl AdminSession {
             updated_at: now,
         }
     }
+    fn map_from_row(row: &Row) -> Result<Self, Error> {
+        Ok(Self {
+            session: row.get(0)?,
+            created_at: row.get(1)?,
+            updated_at: row.get(2)?,
+        })
+    }
     pub async fn insert(self, pool: &Pool) -> Result<(), async_sqlite::Error> {
         pool.conn(move |conn| {
             let mut stmt = conn.prepare(
@@ -97,5 +104,28 @@ impl AdminSession {
         })
         .await?;
         Ok(())
+    }
+    pub async fn verify(pool: &Pool, cookie_session: String) -> Result<bool, async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("SELECT * FROM admin_session WHERE session = ?1")?;
+            let session =
+                match stmt.query_one([cookie_session.clone()], |row| Self::map_from_row(row)) {
+                    Ok(session) => session,
+                    Err(e) => {
+                        log::error!("SQL error: {e}");
+                        AdminSession {
+                            session: String::new(),
+                            created_at: String::new(),
+                            updated_at: String::new(),
+                        }
+                    }
+                };
+            log::debug!(
+                "DB Session ID: {} (cookie: {cookie_session}",
+                session.session
+            );
+            return Ok(session.session == cookie_session);
+        })
+        .await
     }
 }
