@@ -14,8 +14,7 @@ ENV PKG_CONFIG_PATH=/nix/var/nix/profiles/default/lib/pkgconfig
 
 # Build assets (adjust these commands as needed for your project)
 RUN bun install
-RUN bun run scripts/bundle-js.ts
-RUN tailwindcss -i ./src/css/tailwind.css -o ./compiled_assets/css/tailwind.css
+RUN echo "PUBLIC_PRODUCTION=true" >> .env
 
 # Build Rust app
 RUN cargo build --release
