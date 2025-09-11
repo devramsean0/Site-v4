@@ -17,6 +17,7 @@ jobs:
         run: nix develop --command cargo build --release
   build:
     name: Build and Push Docker Image
+    needs: check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -30,3 +31,20 @@ jobs:
         run: docker build -t ghcr.io/devramsean0/site-v4:latest .
       - name: Push Docker image
         run: docker push ghcr.io/devramsean0/site-v4:latest
+  deploy:
+    name: Deploy Update
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tailscale Login
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+      - name: Update container
+        run: |
+          tailscale ssh sean@scipio \
+          cd sitev4 \
+          docker compose down \
+          docker compose up --pull always
