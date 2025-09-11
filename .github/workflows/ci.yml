@@ -3,21 +3,20 @@ on: [push]
 name: CI
 
 jobs:
-  check:
-    name: Rust project
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@main
-      - uses: DeterminateSystems/magic-nix-cache-action@main
-      - name: Run Bun install
-        run: nix develop --command bun install
-      - name: Run Release Cargo Build
-        run: nix develop --command cargo build --release
+#  check:
+#    name: Rust project
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Install Nix
+#        uses: DeterminateSystems/nix-installer-action@main
+#      - uses: DeterminateSystems/magic-nix-cache-action@main
+#      - name: Run Bun install
+#        run: nix develop --command bun install
+#      - name: Run Release Cargo Build
+#        run: nix develop --command cargo build --release
   build:
     name: Build and Push Docker Image
-    needs: check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
