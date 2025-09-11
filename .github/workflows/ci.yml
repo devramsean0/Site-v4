@@ -42,8 +42,4 @@ jobs:
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:ci
       - name: Update container
-        run: |
-          tailscale ssh sean@scipio \
-          cd sitev4 \
-          && docker compose down \
-          && docker compose up --pull always
+        run: tailscale ssh scipio "cd sitev4 && docker compose up -d --pull always --remove-orphans"
