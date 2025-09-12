@@ -94,7 +94,11 @@ async fn main() -> std::io::Result<()> {
             .service(routes::api::api_spotify_get)
             .service(routes::admin::authentication::admin_login_get)
             .service(routes::admin::authentication::admin_login_post)
-            .service(web::scope("/admin").service(routes::admin::experience::experience_list))
+            .service(
+                web::scope("/admin")
+                    .service(routes::admin::experience::experience_list)
+                    .service(routes::admin::experience::experience_new_get),
+            )
     })
     .bind((host.clone(), port))?
     .run();
