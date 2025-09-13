@@ -3,7 +3,7 @@ use actix_files::Files;
 use actix_session::{config::PersistentSession, storage::CookieSessionStore, SessionMiddleware};
 use actix_web::{
     cookie::{self, Key},
-    middleware, web, App, HttpServer,
+    middleware as ActixMiddleware, web, App, HttpServer,
 };
 use async_sqlite::PoolBuilder;
 use std::{
@@ -73,7 +73,7 @@ async fn main() -> std::io::Result<()> {
 
     let server = HttpServer::new(move || {
         App::new()
-            .wrap(middleware::Logger::default())
+            .wrap(ActixMiddleware::Logger::default())
             .wrap(
                 SessionMiddleware::builder(CookieSessionStore::default(), Key::from(&[0; 64]))
                     //TODO will need to set to true in production
@@ -94,7 +94,11 @@ async fn main() -> std::io::Result<()> {
             .service(routes::api::api_spotify_get)
             .service(routes::admin::authentication::admin_login_get)
             .service(routes::admin::authentication::admin_login_post)
-            .service(routes::admin::experience::experience_list)
+            .service(
+                web::scope("/admin")
+                    .service(routes::admin::experience::experience_list)
+                    .service(routes::admin::experience::experience_new_get),
+            )
     })
     .bind((host.clone(), port))?
     .run();

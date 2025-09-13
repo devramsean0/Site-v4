@@ -1,4 +1,11 @@
+use std::sync::Arc;
+
+use actix_session::Session;
+use actix_web::web;
+use async_sqlite::Pool;
 use reqwest::StatusCode;
+
+use crate::db;
 
 pub async fn fetch_spotify_endpoint() -> reqwest::Result<String> {
     let host = std::env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
@@ -18,4 +25,25 @@ pub async fn fetch_spotify_endpoint() -> reqwest::Result<String> {
         StatusCode::OK => http_req.text().await.unwrap(),
         _ => String::new(),
     })
+}
+
+pub async fn verify_admin_authentication(
+    session: &Session,
+    pool: web::Data<Arc<Pool>>,
+) -> Result<bool, anyhow::Error> {
+    let mut session_id = match session.get::<String>("session_id") {
+        Ok(Some(id)) => id,
+        _ => {
+            log::debug!("Missing Session token");
+            return Ok(false);
+        }
+    };
+    log::debug!("ID: {}", session_id);
+    if db::AdminSession::verify(&pool, session_id).await? {
+        log::debug!("Authenticated");
+        return Ok(true);
+    } else {
+        log::debug!("Unknown Session");
+        return Ok(false);
+    };
 }
