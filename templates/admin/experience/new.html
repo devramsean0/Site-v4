@@ -2,7 +2,7 @@
 {%- import "../../parts/form.html" as form -%}
 {% block admincontent %}
 <h1 class="text-2xl">admin#experience#new</h1>
-<form action="/admin/experience/" method="post">
+<form action="/admin/experience" method="post">
     {% call form::input("", "name", "Name", "true") %}
     {% call form::input("", "company", "Company", "true") %}
     {% call form::input("", "description", "Description", "true") %}

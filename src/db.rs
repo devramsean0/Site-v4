@@ -1,4 +1,5 @@
 use async_sqlite::Pool;
+use chrono::NaiveDate;
 use rand::Rng;
 use rusqlite::{Error, Row};
 
@@ -26,6 +27,20 @@ pub async fn create_tables(pool: &Pool) -> Result<(), async_sqlite::Error> {
                 created_at TEXT  NOT NULL,
                 updated_at TEXT  NOT NULL
             )",
+            [],
+        )
+        .unwrap();
+        // experience
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS experience (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            company TEXT NOT NULL,
+            description TEXT NOT NULL,
+            start_date TEXT NOT NULL,
+            end_date TEXT,
+            type TEXT NOT NULL
+        )",
             [],
         )
         .unwrap();
@@ -121,10 +136,75 @@ impl AdminSession {
                     }
                 };
             log::debug!(
-                "DB Session ID: {} (cookie: {cookie_session}",
+                "DB Session ID: {} (cookie: {cookie_session})",
                 session.session
             );
             return Ok(session.session == cookie_session);
+        })
+        .await
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Experience {
+    pub name: String,
+    pub company: String,
+    pub description: String,
+    pub start_date: String,
+    pub end_date: String,
+    pub e_type: String,
+}
+impl Experience {
+    fn map_from_row(row: &Row) -> Result<Self, Error> {
+        let start_date: String = row.get(4)?;
+        let end_date: String = row.get(5)?;
+
+        // Format the dates
+        let start_date_formatted = Self::format_date(&start_date);
+        let end_date_formatted = if end_date.is_empty() {
+            String::new()
+        } else {
+            Self::format_date(&end_date)
+        };
+
+        Ok(Self {
+            name: row.get(1)?,
+            company: row.get(2)?,
+            description: row.get(3)?,
+            start_date: start_date_formatted.clone().to_owned(),
+            end_date: end_date_formatted.clone().to_owned(),
+            e_type: row.get(6)?,
+        })
+    }
+    fn format_date(date_str: &str) -> String {
+        match NaiveDate::parse_from_str(date_str, "%Y-%m-%d") {
+            Ok(date) => date.format("%B %Y").to_string(),
+            Err(_) => date_str.to_string(),
+        }
+    }
+    pub async fn insert(pool: &Pool, data: Experience) -> Result<(), async_sqlite::Error> {
+        pool.conn(|conn| {
+            let mut stmt = conn.prepare(
+                "INSERT INTO experience (name, company, description, start_date, end_date, type) VALUES (?1, ?2, ?3, ?4, ?5, ?6)"
+            ).unwrap();
+            stmt.execute([data.name, data.company, data.description, data.start_date, data.end_date, data.e_type])?;
+            Ok(())
+        })
+        .await?;
+        Ok(())
+    }
+    pub async fn all(pool: &Pool) -> Result<Vec<Self>, async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("SELECT * FROM experience")?;
+            let status_iter = stmt
+                .query_map([], |row| Ok(Self::map_from_row(row).unwrap()))
+                .unwrap();
+
+            let mut statuses = Vec::new();
+            for status in status_iter {
+                statuses.push(status?);
+            }
+            Ok(statuses)
         })
         .await
     }

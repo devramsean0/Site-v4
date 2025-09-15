@@ -12,4 +12,37 @@
         <img src="/assets/icon/down-caret.svg" alt="Down Caret Icon" width="128" height="128" loading="eager" />
     </div>
 </header>
+<section id="about" class="bg-s1 min-h-screen max-h-fit">
+    <h2 class="text-5xl font-bold text-center py-5">About</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-2 grid-rows-2 lg:grid-rows-1 gap-4">
+        <div class="flex flex-col items-center">
+            <h2 class="text-4xl">My Experience</h2>
+            {% for experience in experiences %}
+            <div class="w-full prl-4 p-4 flex m-2 bg-gray-700/20 rounded-lg">
+                <div class="flex items-center justify-between w-full gap-2">
+                    <div>
+                        <h3 class="text-lg font-semibold">
+                            {{ experience.name }}
+                        </h3>
+                        <h3 class="text-sm font-semibold">
+                            {{ experience.e_type }}
+                        </h3>
+                        <h3 class="text-sm">
+                            {{ experience.company }}
+                        </h3>
+                    </div>
+                    <p>
+                        {{ experience.start_date }}
+                        {% if experience.end_date != String::new() %}
+                        - {{ experience.end_date }}
+                        {% else %}
+                        - Present
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
 {%endblock content%}

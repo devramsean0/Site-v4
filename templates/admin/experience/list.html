@@ -11,5 +11,16 @@
         <th>End Date</th>
         <th>Buttons</th>
     </tr>
+    {% for experience in experiences %}
+    <tr>
+        <td>{{ experience.name }}</td>
+        <td>{{ experience.company }}</td>
+        <td>{{ experience.description }}</td>
+        <td>{{ experience.start_date }}</td>
+        <td>{{ experience.end_date }}</td>
+        <td>{{ experience.e_type }}</td>
+
+    </tr>
+    {% endfor %}
 </table>
 {%endblock admincontent%}

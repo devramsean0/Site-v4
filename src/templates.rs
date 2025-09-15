@@ -1,3 +1,4 @@
+use crate::db;
 use askama::Template;
 
 #[derive(Template)]
@@ -5,6 +6,8 @@ use askama::Template;
 pub struct IndexTemplate<'a> {
     pub title: &'a str,
     pub spotify_widget: String,
+    pub experiences: Vec<db::Experience>,
+    pub education: Vec<db::Experience>,
 }
 
 #[derive(Template)]
@@ -31,6 +34,7 @@ pub struct AdminLoginTemplate<'a> {
 pub struct AdminExperienceListTemplate<'a> {
     pub title: &'a str,
     pub error: Option<&'a str>,
+    pub experiences: Vec<db::Experience>,
 }
 #[derive(Template)]
 #[template(path = "admin/experience/new.html")]

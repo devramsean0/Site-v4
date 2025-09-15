@@ -29,7 +29,7 @@ pub async fn fetch_spotify_endpoint() -> reqwest::Result<String> {
 
 pub async fn verify_admin_authentication(
     session: &Session,
-    pool: web::Data<Arc<Pool>>,
+    pool: &web::Data<Arc<Pool>>,
 ) -> Result<bool, anyhow::Error> {
     let mut session_id = match session.get::<String>("session_id") {
         Ok(Some(id)) => id,
