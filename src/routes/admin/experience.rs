@@ -7,7 +7,9 @@ use crate::{
 };
 use actix_session::Session;
 use actix_web::{
-    get, post,
+    delete, get,
+    http::StatusCode,
+    post,
     web::{self, Redirect},
     HttpRequest, HttpResponse, Responder,
 };
@@ -80,7 +82,6 @@ pub async fn experience_new_post(
     db_pool: web::Data<Arc<Pool>>,
     session: Session,
 ) -> HttpResponse {
-    log::info!("Form Submission Hit");
     if utils::verify_admin_authentication(&session, &db_pool)
         .await
         .unwrap_or_default()
@@ -94,6 +95,7 @@ pub async fn experience_new_post(
     db::Experience::insert(
         &db_pool,
         db::Experience {
+            id: None,
             name: params.name.clone(),
             company: params.company.clone(),
             description: params.description.clone(),
@@ -120,6 +122,40 @@ pub async fn experience_new_post(
         .map_into_boxed_body()
 }
 
+#[delete("/experience/{id}")]
+pub async fn experience_delete(
+    params: web::Path<AdminExperienceDeleteProps>,
+    state: web::Data<AppState>,
+    request: HttpRequest,
+    db_pool: web::Data<Arc<Pool>>,
+    session: Session,
+) -> HttpResponse {
+    if utils::verify_admin_authentication(&session, &db_pool)
+        .await
+        .unwrap_or_default()
+        != true
+    {
+        return Redirect::to("/admin/login")
+            .see_other()
+            .respond_to(&request)
+            .map_into_boxed_body();
+    }
+    db::Experience::delete(&db_pool, params.into_inner())
+        .await
+        .unwrap();
+    let tree = utils::calculate_experience_tree(&db_pool).await.unwrap();
+    match state
+        .store
+        .lock()
+        .unwrap()
+        .insert("experience".to_string(), tree)
+    {
+        None => log::debug!("KV value updated"),
+        Some(_) => log::debug!("KV value created"),
+    };
+    HttpResponse::Ok().status(StatusCode::NO_CONTENT).finish()
+}
+
 #[derive(serde::Deserialize)]
 struct AdminExperienceNewProps {
     name: String,
@@ -128,4 +164,9 @@ struct AdminExperienceNewProps {
     start_date: String,
     end_date: Option<String>,
     e_type: String,
+}
+
+#[derive(serde::Deserialize)]
+pub struct AdminExperienceDeleteProps {
+    pub id: String,
 }

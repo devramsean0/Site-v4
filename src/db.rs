@@ -3,6 +3,8 @@ use chrono::NaiveDate;
 use rand::Rng;
 use rusqlite::{Error, Row};
 
+use crate::routes::admin::experience::AdminExperienceDeleteProps;
+
 const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const STR_LEN: usize = 15;
 
@@ -147,6 +149,7 @@ impl AdminSession {
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq)]
 pub struct Experience {
+    pub id: Option<i64>,
     pub name: String,
     pub company: String,
     pub description: String,
@@ -168,6 +171,7 @@ impl Experience {
         };
 
         Ok(Self {
+            id: row.get(0)?,
             name: row.get(1)?,
             company: row.get(2)?,
             description: row.get(3)?,
@@ -207,5 +211,19 @@ impl Experience {
             Ok(statuses)
         })
         .await
+    }
+    pub async fn delete(
+        pool: &Pool,
+        data: AdminExperienceDeleteProps,
+    ) -> Result<(), async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let mut stmt = conn
+                .prepare("DELETE * FROM experience WHERE id = ?1")
+                .unwrap();
+            stmt.execute([data.id.to_owned()])?;
+            Ok(())
+        })
+        .await?;
+        Ok(())
     }
 }

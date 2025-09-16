@@ -19,6 +19,9 @@
         <td>{{ experience.start_date }}</td>
         <td>{{ experience.end_date }}</td>
         <td>{{ experience.e_type }}</td>
+        <td><button data-controller="admin-delete" data-admin_delete-path="/admin/experience"
+                data-admin_delete-id="{{ experience.id.unwrap() }}"
+                data-action="click->admin-delete#process">Delete</button></td>
 
     </tr>
     {% endfor %}

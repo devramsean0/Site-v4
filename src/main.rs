@@ -98,7 +98,8 @@ async fn main() -> std::io::Result<()> {
                 web::scope("/admin")
                     .service(routes::admin::experience::experience_list)
                     .service(routes::admin::experience::experience_new_get)
-                    .service(routes::admin::experience::experience_new_post),
+                    .service(routes::admin::experience::experience_new_post)
+                    .service(routes::admin::experience::experience_delete),
             )
     })
     .bind((host.clone(), port))?
