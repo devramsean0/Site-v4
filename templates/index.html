@@ -17,31 +17,37 @@
     <div class="mx-2 grid grid-cols-1 lg:grid-cols-2 grid-rows-2 lg:grid-rows-1 gap-4">
         <div class="flex flex-col items-center">
             <h2 class="text-4xl">My Experience</h2>
-            {% for company in experiences %}
-            <div class="w-full prl-4 mx-6 items-left justify-center p-4 flex flex-col bg-white m-2 rounded-lg">
-                <h3 class="text-2xl">{{ company.company }}</h3>
-                <ul class="mx-8">
-                    {% for experience in company.experience %}
-                    <li>
-                        <h4 class="text-xl">{{ experience.name }}</h4>
-                        <p class="text-md">
-                            {{ experience.e_type }}
-                            <br />
-                            {{ experience.start_date }}
-                            {% if experience.end_date != String::new() %}
-                            - {{ experience.end_date }}
-                            {% else %}
-                            - Present
-                            {% endif %}
-                        </p>
-                        <p class="text-md">
-                            {{ experience.description }}
-                        </p>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endfor %}
+            <ul class="w-full prl-4 mx-6 items-left justify-center gap-8 p-4 flex flex-col bg-white m-2 rounded-lg">
+                {% for company in experiences %}
+                <li class="relative pl-6 pb-0">
+                    <div>
+                        <h3 class="text-2xl">{{ company.company }}</h3>
+                    </div>
+                    <ul class="mx-8 gap-4">
+                        {% for experience in company.experience %}
+                        <li class="relative pl-6 pb-0">
+                            <div class="absolute left-0 top-1.5 w-3 h-3 bg-gray-300 rounded-full"></div>
+                            <div class="absolute left-1.5 top-3 bottom-0 w-px bg-gray-300 last:hidden"></div>
+                            <h4 class="text-xl">{{ experience.name }}</h4>
+                            <p class="text-md">
+                                {{ experience.e_type }}
+                                <br />
+                                {{ experience.start_date }}
+                                {% if experience.end_date != String::new() %}
+                                - {{ experience.end_date }}
+                                {% else %}
+                                - Present
+                                {% endif %}
+                            </p>
+                            <p class="text-md">
+                                {{ experience.description }}
+                            </p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
 </section>

@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::{
     db,
     templates::{AdminExperienceListTemplate, AdminExperienceNewTemplate},
-    utils,
+    utils, AppState,
 };
 use actix_session::Session;
 use actix_web::{
@@ -75,6 +75,7 @@ pub async fn experience_new_get(
 #[post("/experience")]
 pub async fn experience_new_post(
     params: web::Form<AdminExperienceNewProps>,
+    state: web::Data<AppState>,
     request: HttpRequest,
     db_pool: web::Data<Arc<Pool>>,
     session: Session,
@@ -103,6 +104,16 @@ pub async fn experience_new_post(
     )
     .await
     .unwrap();
+    let tree = utils::calculate_experience_tree(&db_pool).await.unwrap();
+    match state
+        .store
+        .lock()
+        .unwrap()
+        .insert("experience".to_string(), tree)
+    {
+        None => log::debug!("KV value updated"),
+        Some(_) => log::debug!("KV value created"),
+    };
     Redirect::to("/admin/experience")
         .see_other()
         .respond_to(&request)

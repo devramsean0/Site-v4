@@ -83,7 +83,6 @@ pub async fn calculate_experience_tree(
             });
         }
     }
-    println!("{:#?}", sorted);
     Ok(serde_json::to_string(&sorted).unwrap())
 }
 
