@@ -14,32 +14,32 @@
 </header>
 <section id="about" class="bg-s1 min-h-screen max-h-fit">
     <h2 class="text-5xl font-bold text-center py-5">About</h2>
-    <div class="grid grid-cols-1 lg:grid-cols-2 grid-rows-2 lg:grid-rows-1 gap-4">
+    <div class="mx-2 grid grid-cols-1 lg:grid-cols-2 grid-rows-2 lg:grid-rows-1 gap-4">
         <div class="flex flex-col items-center">
             <h2 class="text-4xl">My Experience</h2>
-            {% for experience in experiences %}
-            <div class="w-full prl-4 p-4 flex m-2 bg-gray-700/20 rounded-lg">
-                <div class="flex items-center justify-between w-full gap-2">
-                    <div>
-                        <h3 class="text-lg font-semibold">
-                            {{ experience.name }}
-                        </h3>
-                        <h3 class="text-sm font-semibold">
+            {% for company in experiences %}
+            <div class="w-full prl-4 mx-6 items-left justify-center p-4 flex flex-col bg-white m-2 rounded-lg">
+                <h3 class="text-2xl">{{ company.company }}</h3>
+                <ul class="mx-8">
+                    {% for experience in company.experience %}
+                    <li>
+                        <h4 class="text-xl">{{ experience.name }}</h4>
+                        <p class="text-md">
                             {{ experience.e_type }}
-                        </h3>
-                        <h3 class="text-sm">
-                            {{ experience.company }}
-                        </h3>
-                    </div>
-                    <p>
-                        {{ experience.start_date }}
-                        {% if experience.end_date != String::new() %}
-                        - {{ experience.end_date }}
-                        {% else %}
-                        - Present
-                        {% endif %}
-                    </p>
-                </div>
+                            <br />
+                            {{ experience.start_date }}
+                            {% if experience.end_date != String::new() %}
+                            - {{ experience.end_date }}
+                            {% else %}
+                            - Present
+                            {% endif %}
+                        </p>
+                        <p class="text-md">
+                            {{ experience.description }}
+                        </p>
+                    </li>
+                    {% endfor %}
+                </ul>
             </div>
             {% endfor %}
         </div>

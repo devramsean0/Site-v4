@@ -1,4 +1,4 @@
-use crate::db;
+use crate::{db, utils::OrganizedExperienceCompany};
 use askama::Template;
 
 #[derive(Template)]
@@ -6,8 +6,8 @@ use askama::Template;
 pub struct IndexTemplate<'a> {
     pub title: &'a str,
     pub spotify_widget: String,
-    pub experiences: Vec<db::Experience>,
-    pub education: Vec<db::Experience>,
+    pub experiences: Vec<OrganizedExperienceCompany>,
+    pub education: Vec<OrganizedExperienceCompany>,
 }
 
 #[derive(Template)]

@@ -145,7 +145,7 @@ impl AdminSession {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq)]
 pub struct Experience {
     pub name: String,
     pub company: String,

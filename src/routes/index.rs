@@ -4,7 +4,7 @@ use actix_web::{get, web, HttpResponse};
 use askama::Template;
 use async_sqlite::Pool;
 
-use crate::{templates::IndexTemplate, AppState};
+use crate::{db, templates::IndexTemplate, utils, AppState};
 
 #[get("/")]
 pub async fn index_get(state: web::Data<AppState>, db_pool: web::Data<Arc<Pool>>) -> HttpResponse {
@@ -22,23 +22,45 @@ pub async fn index_get(state: web::Data<AppState>, db_pool: web::Data<Arc<Pool>>
             _ => String::new(),
         };
     }
-    let experience = crate::db::Experience::all(&db_pool).await.unwrap();
+    let mut organised_experience = match state.store.lock().unwrap().get("experience") {
+        Some(value) => {
+            serde_json::from_str::<crate::utils::OrganisedExperience>(value.to_owned().as_str())
+                .expect("JSON should be valid")
+        }
+        _ => crate::utils::OrganisedExperience { company: vec![] },
+    };
+    if organised_experience == (crate::utils::OrganisedExperience { company: vec![] }) {
+        let tree = utils::calculate_experience_tree(&db_pool).await.unwrap();
+        organised_experience =
+            serde_json::from_str::<crate::utils::OrganisedExperience>(tree.to_owned().as_str())
+                .unwrap();
+        match state
+            .store
+            .lock()
+            .unwrap()
+            .insert("experience".to_string(), tree)
+        {
+            None => log::debug!("KV value updated"),
+            Some(_) => log::debug!("KV value created"),
+        };
+    }
+
     let html = IndexTemplate {
         title: "Sean Outram",
         spotify_widget: spotify,
-        experiences: experience
+        experiences: organised_experience
+            .company
             .iter()
-            .filter(|x| x.e_type != "education")
+            .filter(|x| x.e_type == "Work")
             .cloned()
             .collect(),
-        education: experience
+        education: organised_experience
+            .company
             .iter()
-            .filter(|x| x.e_type == "education")
+            .filter(|x| x.e_type == "Education")
             .cloned()
             .collect(),
-    }
-    .render()
-    .expect("Template should be valid");
+    };
 
-    HttpResponse::Ok().body(html)
+    HttpResponse::Ok().body(html.render().expect("Template should be valid"))
 }

@@ -7,6 +7,17 @@ use reqwest::StatusCode;
 
 use crate::db;
 
+#[macro_export]
+macro_rules! ternary {
+    ($condition: expr => $true_expr: expr , $false_expr: expr) => {
+        if $condition {
+            $true_expr
+        } else {
+            $false_expr
+        }
+    };
+}
+
 pub async fn fetch_spotify_endpoint() -> reqwest::Result<String> {
     let host = std::env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
     let port = std::env::var("PORT")
@@ -46,4 +57,44 @@ pub async fn verify_admin_authentication(
         log::debug!("Unknown Session");
         return Ok(false);
     };
+}
+
+pub async fn calculate_experience_tree(
+    pool: &web::Data<Arc<Pool>>,
+) -> Result<String, async_sqlite::Error> {
+    log::info!("Calculating Experience");
+    let records = crate::db::Experience::all(&pool).await?;
+    let mut sorted = OrganisedExperience { company: vec![] };
+
+    for record in records {
+        let mut attached = false;
+        for company in &mut sorted.company {
+            if company.company == record.company {
+                attached = true;
+                company.experience.push(record.clone());
+                break;
+            }
+        }
+        if !attached {
+            sorted.company.push(OrganizedExperienceCompany {
+                company: record.company.clone(),
+                experience: vec![record.clone()],
+                e_type: ternary!(record.e_type == "Education".to_string() => "Education".to_string(), "Work".to_string()),
+            });
+        }
+    }
+    println!("{:#?}", sorted);
+    Ok(serde_json::to_string(&sorted).unwrap())
+}
+
+#[derive(serde::Serialize, serde::Deserialize, PartialEq, Clone, Debug)]
+pub struct OrganisedExperience {
+    pub company: Vec<OrganizedExperienceCompany>,
+}
+
+#[derive(serde::Serialize, serde::Deserialize, PartialEq, Clone, Debug)]
+pub struct OrganizedExperienceCompany {
+    pub company: String,
+    pub experience: Vec<crate::db::Experience>,
+    pub e_type: String,
 }
