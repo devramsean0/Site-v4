@@ -1,7 +1,7 @@
-{% macro input(type, name, label, required) %}
+{% macro input(type, name, label, required, value) %}
 <div class="flex flex-col">
     <label for="{{ name }}">{{ label }}:</label>
-    <input name="{{ name }}" type="{{ type }}" id="{{ name }}" required="{{required}}"
+    <input name="{{ name }}" type="{{ type }}" id="{{ name }}" value="{{ value }}" required="{{required}}"
         class="border-1 border-white p-1 rounded-md" />
 </div>
 {% endmacro %}
@@ -10,10 +10,11 @@
 <button class="bg-white p-1 text-black w-full" type="submit">{{ label }}</button>
 {% endmacro %}
 
-{% macro select (name, label, options, required) %}
+{% macro select (name, label, options, required, value) %}
 <div class="flex flex-col">
     <label for="{{ name }}">{{ label }}: </label>
-    <select name="{{ name }}" class="border-1 border-white p-1 rounded-md" required="{{ required }}">
+    <select name="{{ name }}" class="border-1 border-white p-1 rounded-md" value="{{ value }}"
+        required="{{ required }}">
         {% for option in options %}
         <option>{{ option }}</option>
         {% endfor %}

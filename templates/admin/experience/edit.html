@@ -1,0 +1,14 @@
+{% extends "../template.html" %}
+{%- import "../../parts/form.html" as form -%}
+{% block admincontent %}
+<h1 class="text-2xl">admin#experience#edit</h1>
+<form action="/admin/experience/edit/{{ experience.id.unwrap() }}" method="post">
+    {% call form::input("", "name", "Name", "true", experience.name) %}
+    {% call form::input("", "company", "Company", "true", experience.company) %}
+    {% call form::input("", "description", "Description", "true", experience.description) %}
+    {% call form::input("date", "start_date", "Start Date", "true", experience.start_date) %}
+    {% call form::input("date", "end_date", "End Date", "false", experience.end_date) %}
+    {% call form::select("e_type", "Type", e_type, "true", experience.e_type) %}
+    {% call form::submit_button("Post") %}
+</form>
+{%endblock admincontent%}

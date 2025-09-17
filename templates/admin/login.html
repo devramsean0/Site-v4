@@ -5,8 +5,8 @@
     <div class="border-2 border-white p-4 rounded-lg">
         <h1 class="text-2xl">Sign In</h1>
         <form action="/admin/login" method="post" class="flex flex-col gap-2">
-            {% call form::input("email", "email", "Enter your Email address", "true") %}
-            {% call form::input("password", "password", "Enter your Password", "true") %}
+            {% call form::input("email", "email", "Enter your Email address", "true", "") %}
+            {% call form::input("password", "password", "Enter your Password", "true", "") %}
             {% call form::submit_button("Sign In") %}
         </form>
     </div>

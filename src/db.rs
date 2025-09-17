@@ -3,7 +3,7 @@ use chrono::NaiveDate;
 use rand::Rng;
 use rusqlite::{Error, Row};
 
-use crate::routes::admin::experience::AdminExperienceDeleteProps;
+use crate::routes::admin::experience::AdminExperienceSelectProps;
 
 const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const STR_LEN: usize = 15;
@@ -158,17 +158,21 @@ pub struct Experience {
     pub e_type: String,
 }
 impl Experience {
-    fn map_from_row(row: &Row) -> Result<Self, Error> {
+    fn map_from_row(row: &Row, convert_dates: bool) -> Result<Self, Error> {
         let start_date: String = row.get(4)?;
         let end_date: String = row.get(5)?;
 
-        // Format the dates
-        let start_date_formatted = Self::format_date(&start_date);
-        let end_date_formatted = if end_date.is_empty() {
-            String::new()
-        } else {
-            Self::format_date(&end_date)
-        };
+        let mut start_date_formatted = start_date.clone();
+        let mut end_date_formatted = end_date.clone();
+        if convert_dates {
+            // Format the dates
+            start_date_formatted = Self::format_date(&start_date);
+            end_date_formatted = if end_date.is_empty() {
+                String::new()
+            } else {
+                Self::format_date(&end_date)
+            };
+        }
 
         Ok(Self {
             id: row.get(0)?,
@@ -197,11 +201,11 @@ impl Experience {
         .await?;
         Ok(())
     }
-    pub async fn all(pool: &Pool) -> Result<Vec<Self>, async_sqlite::Error> {
+    pub async fn all(pool: &Pool, convert_date: bool) -> Result<Vec<Self>, async_sqlite::Error> {
         pool.conn(move |conn| {
             let mut stmt = conn.prepare("SELECT * FROM experience")?;
             let status_iter = stmt
-                .query_map([], |row| Ok(Self::map_from_row(row).unwrap()))
+                .query_map([], |row| Ok(Self::map_from_row(row, convert_date).unwrap()))
                 .unwrap();
 
             let mut statuses = Vec::new();
@@ -212,15 +216,37 @@ impl Experience {
         })
         .await
     }
+    pub async fn get_by_id(id: String, pool: &Pool) -> Result<Option<Self>, async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("SELECT * FROM experience WHERE id = ?1")?;
+            let user = match stmt.query_one([id], |row| Self::map_from_row(row, false)) {
+                Ok(user) => Some(user),
+                _ => None,
+            };
+            Ok(user)
+        })
+        .await
+    }
     pub async fn delete(
         pool: &Pool,
-        data: AdminExperienceDeleteProps,
+        data: AdminExperienceSelectProps,
     ) -> Result<(), async_sqlite::Error> {
         pool.conn(move |conn| {
             let mut stmt = conn
-                .prepare("DELETE * FROM experience WHERE id = ?1")
+                .prepare("DELETE FROM experience WHERE id = ?1")
                 .unwrap();
             stmt.execute([data.id.to_owned()])?;
+            Ok(())
+        })
+        .await?;
+        Ok(())
+    }
+    pub async fn update(pool: &Pool, data: Experience) -> Result<(), async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare(
+                "UPDATE experience SET name = ?1, company = ?2, description = ?3, start_date = ?4, end_date = ?5, type = ?6 WHERE id = ?7"
+            ).unwrap();
+            stmt.execute([data.name, data.company, data.description, data.start_date, data.end_date, data.e_type, data.id.unwrap().to_string()])?;
             Ok(())
         })
         .await?;

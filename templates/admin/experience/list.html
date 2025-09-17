@@ -19,9 +19,13 @@
         <td>{{ experience.start_date }}</td>
         <td>{{ experience.end_date }}</td>
         <td>{{ experience.e_type }}</td>
-        <td><button data-controller="admin-delete" data-admin_delete-path="/admin/experience"
-                data-admin_delete-id="{{ experience.id.unwrap() }}"
-                data-action="click->admin-delete#process">Delete</button></td>
+        <td class="flex gap-2">
+            <button data-controller="admin-delete" data-admin-delete-path-value="/admin/experience"
+                data-admin-delete-id-value="{{ experience.id.unwrap() }}"
+                data-action="click->admin-delete#process">Delete
+            </button>
+            <a href="/admin/experience/edit/{{ experience.id.unwrap() }}">Edit</a>
+        </td>
 
     </tr>
     {% endfor %}

@@ -63,7 +63,7 @@ pub async fn calculate_experience_tree(
     pool: &web::Data<Arc<Pool>>,
 ) -> Result<String, async_sqlite::Error> {
     log::info!("Calculating Experience");
-    let records = crate::db::Experience::all(&pool).await?;
+    let records = crate::db::Experience::all(&pool, true).await?;
     let mut sorted = OrganisedExperience { company: vec![] };
 
     for record in records {
