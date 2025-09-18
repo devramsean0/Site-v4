@@ -16,6 +16,7 @@ use std::{
 use crate::websocket_channel::ChannelsActor;
 
 mod db;
+mod middleware;
 mod routes;
 mod templates;
 mod utils;
@@ -84,6 +85,7 @@ async fn main() -> std::io::Result<()> {
                     )
                     .build(),
             )
+            .wrap(middleware::content_type::DefaultHtmlContentType)
             .service(Files::new("compiled_assets/", "compiled_assets/"))
             .service(Files::new("assets/", "assets/"))
             .app_data(web::Data::new(db_pool_arc.clone()))
