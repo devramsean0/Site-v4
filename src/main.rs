@@ -98,6 +98,7 @@ async fn main() -> std::io::Result<()> {
             .service(routes::admin::authentication::admin_login_post)
             .service(
                 web::scope("/admin")
+                    .service(routes::admin::admin_get)
                     .service(routes::admin::experience::experience_list)
                     .service(routes::admin::experience::experience_new_get)
                     .service(routes::admin::experience::experience_new_post)

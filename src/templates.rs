@@ -51,3 +51,10 @@ pub struct AdminExperienceEditTemplate<'a> {
     pub e_type: Vec<&'a str>,
     pub experience: db::Experience,
 }
+
+#[derive(Template)]
+#[template(path = "admin/index.html")]
+pub struct AdminOptionsTemplate<'a> {
+    pub title: &'a str,
+    pub error: Option<&'a str>,
+}

@@ -46,6 +46,8 @@ pub async fn create_tables(pool: &Pool) -> Result<(), async_sqlite::Error> {
             [],
         )
         .unwrap();
+        // assets
+
         Ok(())
     })
     .await?;
