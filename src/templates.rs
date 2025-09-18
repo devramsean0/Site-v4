@@ -58,3 +58,17 @@ pub struct AdminOptionsTemplate<'a> {
     pub title: &'a str,
     pub error: Option<&'a str>,
 }
+
+#[derive(Template)]
+#[template(path = "admin/project/list.html")]
+pub struct AdminProjectListTemplate<'a> {
+    pub title: &'a str,
+    pub error: Option<&'a str>,
+    pub projects: Vec<db::Project>,
+}
+#[derive(Template)]
+#[template(path = "admin/project/new.html")]
+pub struct AdminProjectNewTemplate<'a> {
+    pub title: &'a str,
+    pub error: Option<&'a str>,
+}

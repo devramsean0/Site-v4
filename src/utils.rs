@@ -75,6 +75,10 @@ pub async fn calculate_experience_tree(
             if company.company == record.company {
                 attached = true;
                 company.experience.push(record.clone());
+                company
+                    .experience
+                    .sort_unstable_by_key(|item| (item.start_date.clone(), item.end_date.clone()));
+                log::debug!("Sorted Records (per push): {:#?}", company.experience);
                 break;
             }
         }

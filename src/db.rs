@@ -46,8 +46,22 @@ pub async fn create_tables(pool: &Pool) -> Result<(), async_sqlite::Error> {
             [],
         )
         .unwrap();
-        // assets
-
+        // project
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS project (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            description TEXT NOT NULL,
+            src TEXT,
+            docs TEXT,
+            demo TEXT,
+            preview_img TEXT,
+            favourite INTEGER NOT NULL,
+            technologies json NOT NULL
+        )",
+            [],
+        )
+        .unwrap();
         Ok(())
     })
     .await?;
@@ -253,5 +267,80 @@ impl Experience {
         })
         .await?;
         Ok(())
+    }
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq)]
+pub struct Project {
+    pub id: Option<i64>,
+    pub name: String,
+    pub description: String,
+    pub src: Option<String>,
+    pub docs: Option<String>,
+    pub demo: Option<String>,
+    pub preview_img: Option<String>,
+    pub favourite: bool,
+    pub technologies: Vec<String>,
+}
+
+impl Project {
+    fn map_from_row(row: &Row) -> Result<Self, Error> {
+        let technologies_json: String = row.get(8)?;
+
+        // Parse the JSON string back into a Vec<String>
+        let technologies: Vec<String> =
+            serde_json::from_str(&technologies_json).unwrap_or_else(|_| Vec::new());
+        Ok(Self {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            description: row.get(2)?,
+            src: row.get(3)?,
+            docs: row.get(4)?,
+            demo: row.get(5)?,
+            preview_img: row.get(6)?,
+            favourite: row.get(7)?,
+            technologies: technologies,
+        })
+    }
+    pub async fn all(pool: &Pool) -> Result<Vec<Self>, async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("SELECT * FROM project")?;
+            let status_iter = stmt
+                .query_map([], |row| Ok(Self::map_from_row(row).unwrap()))
+                .unwrap();
+
+            let mut statuses = Vec::new();
+            for status in status_iter {
+                statuses.push(status?);
+            }
+            Ok(statuses)
+        })
+        .await
+    }
+    pub async fn insert(pool: &Pool, data: Project) -> Result<(), async_sqlite::Error> {
+        let mut technolgies_string = "json('[".to_string();
+        for tech in data.technologies {
+            technolgies_string.push_str(format!("\"{tech}\",").as_str());
+        }
+        technolgies_string.push_str("]')");
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("INSERT INTO project (name, description, src, docs, demo, preview_img, favourite, technologies) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)").unwrap();
+            stmt.execute([data.name, data.description, data.src.unwrap(), data.docs.unwrap(), data.demo.unwrap(), data.preview_img.unwrap(), data.favourite.to_string(), technolgies_string])?;
+            Ok(())
+        })
+        .await?;
+        Ok(())
+    }
+    pub fn get_src(&self) -> &str {
+        self.src.as_deref().unwrap()
+    }
+    pub fn get_docs(&self) -> &str {
+        self.docs.as_deref().unwrap()
+    }
+    pub fn get_demo(&self) -> &str {
+        self.demo.as_deref().unwrap()
+    }
+    pub fn get_preview_img(&self) -> &str {
+        self.preview_img.as_deref().unwrap()
     }
 }
