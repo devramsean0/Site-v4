@@ -109,7 +109,10 @@ async fn main() -> std::io::Result<()> {
                     // Project
                     .service(routes::admin::projects::project_list)
                     .service(routes::admin::projects::project_new_get)
-                    .service(routes::admin::projects::project_new_post),
+                    .service(routes::admin::projects::project_new_post)
+                    .service(routes::admin::projects::project_delete)
+                    .service(routes::admin::projects::project_edit_get)
+                    .service(routes::admin::projects::project_edit_post),
             )
     })
     .bind((host.clone(), port))?

@@ -72,3 +72,11 @@ pub struct AdminProjectNewTemplate<'a> {
     pub title: &'a str,
     pub error: Option<&'a str>,
 }
+
+#[derive(Template)]
+#[template(path = "admin/project/edit.html")]
+pub struct AdminProjectEditTemplate<'a> {
+    pub title: &'a str,
+    pub error: Option<&'a str>,
+    pub project: db::Project,
+}

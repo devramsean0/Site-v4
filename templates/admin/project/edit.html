@@ -1,0 +1,16 @@
+{% extends "../template.html" %}
+{%- import "../../parts/form.html" as form -%}
+{% block admincontent %}
+<h1 class="text-2xl">admin#project#edit</h1>
+<form action="/admin/project/edit/{{ project.id.unwrap() }}" method="post" enctype="multipart/form-data">
+    {% call form::input("", "name", "Name", "true", project.name) %}
+    {% call form::input("", "description", "Description", "true", project.description) %}
+    {% call form::input("", "src", "SRC", "false", project.get_src()) %}
+    {% call form::input("", "docs", "Docs", "false", project.get_docs()) %}
+    {% call form::input("", "demo", "Demo", "false", project.get_demo()) %}
+    <img src="/{{ project.get_preview_img() }}" />
+    {% call form::input("file", "preview_img", "Preview IMG", "false", project.get_preview_img()) %}
+    {% call form::input("checkbox", "favourite", "Favourite", "true", project.favourite) %}
+    {% call form::submit_button("Edit") %}
+</form>
+{%endblock admincontent%}

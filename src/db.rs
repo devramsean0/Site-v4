@@ -3,7 +3,10 @@ use chrono::NaiveDate;
 use rand::Rng;
 use rusqlite::{Error, Row};
 
-use crate::{routes::admin::experience::AdminExperienceSelectProps, ternary};
+use crate::{
+    routes::admin::{experience::AdminExperienceSelectProps, projects::AdminProjectSelectProps},
+    ternary,
+};
 
 const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const STR_LEN: usize = 15;
@@ -319,6 +322,17 @@ impl Project {
         })
         .await
     }
+    pub async fn get_by_id(id: String, pool: &Pool) -> Result<Option<Self>, async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("SELECT * FROM project WHERE id = ?1")?;
+            let user = match stmt.query_one([id], |row| Self::map_from_row(row)) {
+                Ok(user) => Some(user),
+                _ => None,
+            };
+            Ok(user)
+        })
+        .await
+    }
     pub async fn insert(pool: &Pool, data: Project) -> Result<(), async_sqlite::Error> {
         let mut technolgies_string = "json('[".to_string();
         for tech in data.technologies {
@@ -328,6 +342,18 @@ impl Project {
         pool.conn(move |conn| {
             let mut stmt = conn.prepare("INSERT INTO project (name, description, src, docs, demo, preview_img, favourite, technologies) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)").unwrap();
             stmt.execute([data.name, data.description, data.src.unwrap(), data.docs.unwrap(), data.demo.unwrap(), data.preview_img.unwrap(), ternary!(data.favourite => "1".to_string(), "0".to_string()), technolgies_string])?;
+            Ok(())
+        })
+        .await?;
+        Ok(())
+    }
+    pub async fn delete(
+        pool: &Pool,
+        data: AdminProjectSelectProps,
+    ) -> Result<(), async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("DELETE FROM project WHERE id = ?1").unwrap();
+            stmt.execute([data.id.to_owned()])?;
             Ok(())
         })
         .await?;

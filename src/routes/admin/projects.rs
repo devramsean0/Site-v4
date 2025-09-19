@@ -3,7 +3,9 @@ use std::sync::Arc;
 use actix_multipart::Multipart;
 use actix_session::Session;
 use actix_web::{
-    get, post,
+    delete, get,
+    http::StatusCode,
+    post,
     web::{self, Redirect},
     HttpRequest, HttpResponse, Responder,
 };
@@ -14,8 +16,8 @@ use futures::StreamExt;
 use crate::{
     assets,
     db::{self, Project},
-    templates::{AdminProjectListTemplate, AdminProjectNewTemplate},
-    utils,
+    templates::{AdminProjectEditTemplate, AdminProjectListTemplate, AdminProjectNewTemplate},
+    utils, AppState,
 };
 
 #[get("/project")]
@@ -143,6 +145,126 @@ pub async fn project_new_post(
         .map_into_boxed_body()
 }
 
+#[delete("/project/{id}")]
+pub async fn project_delete(
+    params: web::Path<AdminProjectSelectProps>,
+    _state: web::Data<AppState>,
+    request: HttpRequest,
+    db_pool: web::Data<Arc<Pool>>,
+    session: Session,
+) -> HttpResponse {
+    if utils::verify_admin_authentication(&session, &db_pool)
+        .await
+        .unwrap_or_default()
+        != true
+    {
+        return Redirect::to("/admin/login")
+            .see_other()
+            .respond_to(&request)
+            .map_into_boxed_body();
+    }
+    db::Project::delete(&db_pool, params.into_inner())
+        .await
+        .unwrap();
+    HttpResponse::Ok().status(StatusCode::NO_CONTENT).finish()
+}
+
+#[get("/project/edit/{id}")]
+pub async fn project_edit_get(
+    params: web::Path<AdminProjectSelectProps>,
+    request: HttpRequest,
+    db_pool: web::Data<Arc<Pool>>,
+    session: Session,
+) -> HttpResponse {
+    if utils::verify_admin_authentication(&session, &db_pool)
+        .await
+        .unwrap_or_default()
+        != true
+    {
+        return Redirect::to("/admin/login")
+            .see_other()
+            .respond_to(&request)
+            .map_into_boxed_body();
+    }
+    let record = db::Project::get_by_id(params.id.clone(), &db_pool)
+        .await
+        .unwrap()
+        .unwrap();
+    let html = AdminProjectEditTemplate {
+        title: "Project | Admin",
+        error: None,
+        project: record,
+    }
+    .render()
+    .expect("template should be valid");
+    HttpResponse::Ok().body(html)
+}
+
+#[post("/project/edit/{id}")]
+pub async fn project_edit_post(
+    params: web::Path<AdminProjectSelectProps>,
+    _state: web::Data<AppState>,
+    request: HttpRequest,
+    db_pool: web::Data<Arc<Pool>>,
+    session: Session,
+    mut payload: Multipart,
+) -> HttpResponse {
+    if utils::verify_admin_authentication(&session, &db_pool)
+        .await
+        .unwrap_or_default()
+        != true
+    {
+        return Redirect::to("/admin/login")
+            .see_other()
+            .respond_to(&request)
+            .map_into_boxed_body();
+    }
+    let mut form_data: AdminProjectNewProps = AdminProjectNewProps::default();
+    let record = db::Project::get_by_id(params.id.clone(), &db_pool)
+        .await
+        .unwrap()
+        .unwrap();
+    form_data.preview_img = record.preview_img;
+    while let Some(item) = payload.next().await {
+        let mut field = item.unwrap();
+        let name = field.name().unwrap_or_default().to_string();
+
+        let mut value = Vec::new();
+        while let Some(chunk) = field.next().await {
+            value.extend_from_slice(&chunk.unwrap());
+        }
+
+        match name.as_str() {
+            "name" => form_data.name = String::from_utf8_lossy(&value).to_string(),
+            "description" => form_data.description = String::from_utf8_lossy(&value).to_string(),
+            "src" => form_data.src = Some(String::from_utf8_lossy(&value).to_string()),
+            "docs" => form_data.docs = Some(String::from_utf8_lossy(&value).to_string()),
+            "demo" => form_data.demo = Some(String::from_utf8_lossy(&value).to_string()),
+            "favourite" => form_data.favourite = String::from_utf8_lossy(&value).to_string(),
+            "preview_img" => {
+                if String::from_utf8_lossy(&value).to_string() != String::new() {
+                    // Save file to disk or buffer
+                    let filename = field
+                        .content_disposition()
+                        .and_then(|cd| cd.get_filename())
+                        .unwrap_or("upload.tmp");
+                    let filepath = assets::generate_filename(filename.to_string())
+                        .await
+                        .unwrap();
+                    log::info!("Generated filepath: {filepath}");
+                    std::fs::write(&filepath, &value).unwrap();
+                    form_data.preview_img = Some(filepath);
+                }
+            }
+            _ => {}
+        }
+    }
+    Redirect::to("/admin/project")
+        .see_other()
+        .respond_to(&request)
+        .map_into_boxed_body()
+}
+
 #[derive(serde::Deserialize, Debug, Default)]
 struct AdminProjectNewProps {
     name: String,
@@ -152,4 +274,9 @@ struct AdminProjectNewProps {
     demo: Option<String>,
     preview_img: Option<String>,
     favourite: String,
+}
+
+#[derive(serde::Deserialize)]
+pub struct AdminProjectSelectProps {
+    pub id: String,
 }

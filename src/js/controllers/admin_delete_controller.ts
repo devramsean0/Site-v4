@@ -12,6 +12,7 @@ export default class extends Controller {
         await fetch(path, {
             method: "delete"
         })
+        location.reload()
     }
 
 
