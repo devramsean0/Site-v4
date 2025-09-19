@@ -2,8 +2,7 @@ use random_str as random;
 use tokio::fs;
 
 pub async fn generate_filename(filename: String) -> Result<String, anyhow::Error> {
-    let upload_folder =
-        std::env::var("API_UPDATE_TOKEN").unwrap_or_else(|_| "./uploads".to_string());
+    let upload_folder = std::env::var("UPLOADS_PATH").unwrap_or_else(|_| "./uploads".to_string());
     fs::create_dir_all(upload_folder.clone()).await.unwrap();
     let mut file_path = "/".to_string();
     while fs::try_exists(file_path.clone()).await? {
