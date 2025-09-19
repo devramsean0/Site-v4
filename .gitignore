@@ -2,6 +2,7 @@
 /result
 /result-lib
 /compiled_assets
+/uploads
 /node_modules
 .direnv
 

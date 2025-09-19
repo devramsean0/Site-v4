@@ -23,6 +23,7 @@
           pkg-config
           openssl
           bun
+          sqlite
           # config.process-compose.cargo-doc-live.outputs.package
         ];
       };

@@ -3,7 +3,7 @@ use chrono::NaiveDate;
 use rand::Rng;
 use rusqlite::{Error, Row};
 
-use crate::routes::admin::experience::AdminExperienceSelectProps;
+use crate::{routes::admin::experience::AdminExperienceSelectProps, ternary};
 
 const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const STR_LEN: usize = 15;
@@ -290,6 +290,8 @@ impl Project {
         // Parse the JSON string back into a Vec<String>
         let technologies: Vec<String> =
             serde_json::from_str(&technologies_json).unwrap_or_else(|_| Vec::new());
+        let favourite_int: i64 = row.get(7)?;
+        let favourite = favourite_int == 1;
         Ok(Self {
             id: row.get(0)?,
             name: row.get(1)?,
@@ -298,7 +300,7 @@ impl Project {
             docs: row.get(4)?,
             demo: row.get(5)?,
             preview_img: row.get(6)?,
-            favourite: row.get(7)?,
+            favourite: favourite,
             technologies: technologies,
         })
     }
@@ -325,7 +327,7 @@ impl Project {
         technolgies_string.push_str("]')");
         pool.conn(move |conn| {
             let mut stmt = conn.prepare("INSERT INTO project (name, description, src, docs, demo, preview_img, favourite, technologies) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)").unwrap();
-            stmt.execute([data.name, data.description, data.src.unwrap(), data.docs.unwrap(), data.demo.unwrap(), data.preview_img.unwrap(), data.favourite.to_string(), technolgies_string])?;
+            stmt.execute([data.name, data.description, data.src.unwrap(), data.docs.unwrap(), data.demo.unwrap(), data.preview_img.unwrap(), ternary!(data.favourite => "1".to_string(), "0".to_string()), technolgies_string])?;
             Ok(())
         })
         .await?;

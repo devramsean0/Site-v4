@@ -15,6 +15,7 @@ use std::{
 
 use crate::websocket_channel::ChannelsActor;
 
+mod assets;
 mod db;
 mod middleware;
 mod routes;
