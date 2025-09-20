@@ -359,6 +359,30 @@ impl Project {
         .await?;
         Ok(())
     }
+    pub async fn update(pool: &Pool, data: Project) -> Result<(), async_sqlite::Error> {
+        let mut technolgies_string = "json('[".to_string();
+        for tech in data.technologies {
+            technolgies_string.push_str(format!("\"{tech}\",").as_str());
+        }
+        technolgies_string.push_str("]')");
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("UPDATE project SET name = ?1, description = ?2, src = ?3, docs = ?4, demo = ?5, preview_img = ?6, favourite = ?7, technologies = ?8 WHERE id = ?8").unwrap();
+            stmt.execute([
+                data.name,
+                data.description,
+                data.src.unwrap(),
+                data.docs.unwrap(),
+                data.demo.unwrap(),
+                data.preview_img.unwrap(),
+                ternary!(data.favourite => "1".to_string(), "0".to_string()),
+                technolgies_string,
+                data.id.unwrap().to_string(),
+            ])?;
+            Ok(())
+        })
+        .await?;
+        Ok(())
+    }
     pub fn get_src(&self) -> &str {
         self.src.as_deref().unwrap()
     }

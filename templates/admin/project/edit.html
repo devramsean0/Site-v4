@@ -8,7 +8,7 @@
     {% call form::input("", "src", "SRC", "false", project.get_src()) %}
     {% call form::input("", "docs", "Docs", "false", project.get_docs()) %}
     {% call form::input("", "demo", "Demo", "false", project.get_demo()) %}
-    <img src="/{{ project.get_preview_img() }}" />
+    <img src="/uploads/{{ project.get_preview_img() }}" />
     {% call form::input("file", "preview_img", "Preview IMG", "false", project.get_preview_img()) %}
     {% call form::input("checkbox", "favourite", "Favourite", "true", project.favourite) %}
     {% call form::submit_button("Edit") %}

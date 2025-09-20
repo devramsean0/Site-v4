@@ -21,7 +21,7 @@
         <td>{{ project.get_src() }}</td>
         <td>{{ project.get_docs() }}</td>
         <td>{{ project.get_demo() }}</td>
-        <td><img src="{{ project.get_preview_img() }}" /></td>
+        <td><img src="/uploads/{{ project.get_preview_img() }}" width="200" height="200" /></td>
         <td>
             <input type="checkbox" value="{{ project.favourite}}" readonly="true" />
         <td>

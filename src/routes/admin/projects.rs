@@ -114,9 +114,8 @@ pub async fn project_new_post(
                 let filepath = assets::generate_filename(filename.to_string())
                     .await
                     .unwrap();
-                log::info!("Generated filepath: {filepath}");
-                std::fs::write(&filepath, &value).unwrap();
-                form_data.preview_img = Some(filepath);
+                std::fs::write(&filepath.path, &value).unwrap();
+                form_data.preview_img = Some(filepath.filename);
             }
             _ => {}
         }
@@ -251,14 +250,29 @@ pub async fn project_edit_post(
                     let filepath = assets::generate_filename(filename.to_string())
                         .await
                         .unwrap();
-                    log::info!("Generated filepath: {filepath}");
-                    std::fs::write(&filepath, &value).unwrap();
-                    form_data.preview_img = Some(filepath);
+                    std::fs::write(&filepath.path, &value).unwrap();
+                    form_data.preview_img = Some(filepath.filename);
                 }
             }
             _ => {}
         }
     }
+    db::Project::update(
+        &db_pool,
+        Project {
+            id: None,
+            name: form_data.name,
+            description: form_data.description,
+            src: form_data.src,
+            docs: form_data.docs,
+            demo: form_data.demo,
+            preview_img: form_data.preview_img,
+            favourite: form_data.favourite.parse().unwrap_or(false),
+            technologies: vec![],
+        },
+    )
+    .await
+    .unwrap();
     Redirect::to("/admin/project")
         .see_other()
         .respond_to(&request)

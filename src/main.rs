@@ -34,6 +34,8 @@ async fn main() -> std::io::Result<()> {
         .parse::<u16>()
         .unwrap_or(3000);
     let db_url = std::env::var("DB_URL").unwrap_or_else(|_| String::from("./db.sqlite3"));
+    let upload_folder: String =
+        std::env::var("UPLOADS_PATH").unwrap_or_else(|_| "./uploads".to_string());
 
     // Create DB pool
     let pool = match PoolBuilder::new().path(db_url).open().await {
@@ -89,6 +91,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::content_type::DefaultHtmlContentType)
             .service(Files::new("compiled_assets/", "compiled_assets/"))
             .service(Files::new("assets/", "assets/"))
+            .service(Files::new("uploads/", upload_folder.as_str()))
             .app_data(web::Data::new(db_pool_arc.clone()))
             .app_data(web::Data::new(ws_channels.clone()))
             .app_data(state.clone())
