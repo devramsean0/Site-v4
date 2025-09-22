@@ -62,6 +62,20 @@ pub async fn create_tables(pool: &Pool) -> Result<(), async_sqlite::Error> {
             [],
         )
         .unwrap();
+        // guestlog
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS guestlog (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            message TEXT NOT NULL,
+            active INTEGER NOT NULL,
+            gravatar_url TEXT,
+            avatar TEXT
+        )",
+            [],
+        )
+        .unwrap();
         Ok(())
     })
     .await?;
