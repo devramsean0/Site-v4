@@ -40,7 +40,7 @@ COPY --from=rs_build /app/templates /app/templates
 COPY --from=rs_build /app/compiled_assets /app/compiled_assets
 
 # Copy go deps
-COPY --from=go_build /build/go/nr-station-parser /app/dist/nr-station-parser
+COPY --from=go_build /build/go/nr-station-parser/nr-station-parser /app/dist/nr-station-parser
 
 ENV NR_STATION_PARSER_DIST /app/dist/nr-station-parser
 
