@@ -4,7 +4,7 @@ FROM nixos/nix:latest AS go_build
 RUN nix-env -iA nixpkgs.go
 WORKDIR /build/go
 COPY tools .
-RUN go build -c ./nr-station-parser -o ../nr-station-parser
+RUN go build -C ./nr-station-parser -o ../nr-station-parser -v
 
 FROM nixos/nix:latest AS rs_build
 
