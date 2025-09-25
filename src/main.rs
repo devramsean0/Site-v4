@@ -68,8 +68,17 @@ async fn main() -> std::io::Result<()> {
     ctrlc::set_handler(handle).unwrap();
 
     // Spawn spotify worker after server has started
-    let spotify_worker = tokio::spawn(async move {
-        workers::spotify::register(ctrl_c).await.unwrap();
+    let spotify_worker = tokio::spawn({
+        let ctrl_c = ctrl_c.clone();
+        async move {
+            workers::spotify::register(ctrl_c).await.unwrap();
+        }
+    });
+    let nr_station_parser_worker = tokio::spawn({
+        let ctrl_c = ctrl_c.clone();
+        async move {
+            workers::nr_station_parser::register(ctrl_c).await.unwrap();
+        }
     });
 
     let state = web::Data::new(AppState {
@@ -125,7 +134,8 @@ async fn main() -> std::io::Result<()> {
     server.await.unwrap();
 
     spotify_worker.await.unwrap();
-    log::info!("Spotify Worker shutdown");
+    nr_station_parser_worker.await.unwrap();
+    log::info!("Workers Shutdown");
 
     Ok(())
 }

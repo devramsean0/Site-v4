@@ -1,4 +1,7 @@
-use std::sync::Arc;
+use std::{
+    process::{Command, ExitCode, ExitStatus},
+    sync::Arc,
+};
 
 use actix_session::Session;
 use actix_web::web;
@@ -123,6 +126,21 @@ pub async fn render_project_tree(pool: &web::Data<Arc<Pool>>) -> String {
     .expect("template should be valid");
 
     html
+}
+
+pub fn run_station_parser() {
+    let db_url = std::env::var("DB_URL").unwrap_or_else(|_| String::from("./db.sqlite3"));
+    let toc_api_key = std::env::var("NR_TOC_API_KEY").unwrap_or_else(|_| String::from(""));
+    let station_api_key = std::env::var("NR_STATION_API_KEY").unwrap_or_else(|_| String::from(""));
+    let parser_dist = std::env::var("NR_STATION_PARSER_DIST")
+        .unwrap_or_else(|_| String::from("./dist/nr-station-parser"));
+
+    Command::new(parser_dist)
+        .env("DB_URL", db_url)
+        .env("NR_TOC_API_KEY", toc_api_key)
+        .env("NR_STATION_API_KEY", station_api_key)
+        .status()
+        .expect("Command has executed");
 }
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Clone, Debug)]

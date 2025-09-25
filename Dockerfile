@@ -4,7 +4,7 @@ FROM nixos/nix:latest AS go_build
 RUN nix-env -iA nixpkgs.go
 WORKDIR /build/go
 COPY tools .
-RUN go build -C ./nr-station-parser -o ../nr-station-parser -v
+RUN CG0_ENABLED=1 go build -C ./nr-station-parser -o ../nr-station-parser -v
 
 FROM nixos/nix:latest AS rs_build
 
@@ -42,7 +42,7 @@ COPY --from=rs_build /app/compiled_assets /app/compiled_assets
 # Copy go deps
 COPY --from=go_build /build/go/nr-station-parser/nr-station-parser /app/dist/nr-station-parser
 
-ENV NR_STATION_PARSER_DIST /app/dist/nr-station-parser
+ENV NR_STATION_PARSER_DIST=/app/dist/nr-station-parser
 
 EXPOSE 3000
 CMD ["/app/site-v4"]
