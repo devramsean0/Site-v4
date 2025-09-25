@@ -2,10 +2,11 @@ use std::sync::Arc;
 
 use actix_session::Session;
 use actix_web::web;
+use askama::Template;
 use async_sqlite::Pool;
 use reqwest::StatusCode;
 
-use crate::db;
+use crate::{db, templates::ProjectPartTemplate};
 
 #[macro_export]
 macro_rules! ternary {
@@ -91,6 +92,37 @@ pub async fn calculate_experience_tree(
         }
     }
     Ok(serde_json::to_string(&sorted).unwrap())
+}
+
+pub async fn render_project_tree(pool: &web::Data<Arc<Pool>>) -> String {
+    let records = db::Project::all(&pool).await.unwrap();
+    let mut active_records: Vec<db::Project> = vec![];
+    let mut technologies: Vec<(String, i64)> = vec![];
+    for record in records {
+        for tech in record.clone().technologies {
+            match technologies.binary_search_by_key(&tech, |&(ref tech, _count)| tech.to_string()) {
+                Ok(index) => {
+                    log::debug!("Incremented Technology");
+                    technologies[index].1 += 1;
+                }
+                Err(index) => {
+                    log::debug!("Saved new technology");
+                    technologies.insert(index, (tech, 1));
+                }
+            }
+        }
+        if record.favourite {
+            active_records.push(record);
+        }
+    }
+    let html = ProjectPartTemplate {
+        technologies,
+        records: active_records,
+    }
+    .render()
+    .expect("template should be valid");
+
+    html
 }
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Clone, Debug)]

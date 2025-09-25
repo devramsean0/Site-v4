@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use actix_multipart::Multipart;
+use actix_multipart::{form, Multipart};
 use actix_session::Session;
 use actix_web::{
     delete, get,
@@ -77,6 +77,7 @@ pub async fn project_new_post(
     request: HttpRequest,
     db_pool: web::Data<Arc<Pool>>,
     session: Session,
+    state: web::Data<AppState>,
     mut payload: Multipart,
 ) -> HttpResponse {
     let mut form_data = AdminProjectNewProps::default();
@@ -117,27 +118,43 @@ pub async fn project_new_post(
                 std::fs::write(&filepath.path, &value).unwrap();
                 form_data.preview_img = Some(filepath.filename);
             }
+            "technologies" => {
+                let raw = String::from_utf8_lossy(&value).to_string();
+                let split = raw
+                    .split(',')
+                    .map(|val| val.to_string())
+                    .collect::<Vec<String>>();
+                form_data.technologies = split
+            }
             _ => {}
         }
     }
-
     db::Project::insert(
         &db_pool,
         Project {
             id: None,
             name: form_data.name,
             description: form_data.description,
-            src: form_data.src,
-            docs: form_data.docs,
-            demo: form_data.demo,
-            preview_img: form_data.preview_img,
+            src: form_data.src.into(),
+            docs: form_data.docs.into(),
+            demo: form_data.demo.into(),
+            preview_img: form_data.preview_img.into(),
             favourite: form_data.favourite.parse().unwrap_or(false),
-            technologies: vec![],
+            technologies: form_data.technologies,
         },
     )
     .await
     .unwrap();
-
+    let projects = utils::render_project_tree(&db_pool).await;
+    match state
+        .store
+        .lock()
+        .unwrap()
+        .insert("project".to_string(), projects)
+    {
+        None => log::debug!("KV value updated"),
+        Some(_) => log::debug!("KV value created"),
+    };
     Redirect::to("/admin/project")
         .see_other()
         .respond_to(&request)
@@ -147,7 +164,7 @@ pub async fn project_new_post(
 #[delete("/project/{id}")]
 pub async fn project_delete(
     params: web::Path<AdminProjectSelectProps>,
-    _state: web::Data<AppState>,
+    state: web::Data<AppState>,
     request: HttpRequest,
     db_pool: web::Data<Arc<Pool>>,
     session: Session,
@@ -165,6 +182,16 @@ pub async fn project_delete(
     db::Project::delete(&db_pool, params.into_inner())
         .await
         .unwrap();
+    let projects = utils::render_project_tree(&db_pool).await;
+    match state
+        .store
+        .lock()
+        .unwrap()
+        .insert("project".to_string(), projects)
+    {
+        None => log::debug!("KV value updated"),
+        Some(_) => log::debug!("KV value created"),
+    };
     HttpResponse::Ok().status(StatusCode::NO_CONTENT).finish()
 }
 
@@ -202,7 +229,7 @@ pub async fn project_edit_get(
 #[post("/project/edit/{id}")]
 pub async fn project_edit_post(
     params: web::Path<AdminProjectSelectProps>,
-    _state: web::Data<AppState>,
+    state: web::Data<AppState>,
     request: HttpRequest,
     db_pool: web::Data<Arc<Pool>>,
     session: Session,
@@ -223,7 +250,7 @@ pub async fn project_edit_post(
         .await
         .unwrap()
         .unwrap();
-    form_data.preview_img = record.preview_img;
+    form_data.preview_img = record.preview_img.into_option();
     while let Some(item) = payload.next().await {
         let mut field = item.unwrap();
         let name = field.name().unwrap_or_default().to_string();
@@ -254,25 +281,43 @@ pub async fn project_edit_post(
                     form_data.preview_img = Some(filepath.filename);
                 }
             }
+            "technologies" => {
+                let raw = String::from_utf8_lossy(&value).to_string();
+                let split = raw
+                    .split(',')
+                    .map(|val| val.to_string())
+                    .collect::<Vec<String>>();
+                form_data.technologies = split
+            }
             _ => {}
         }
     }
     db::Project::update(
         &db_pool,
         Project {
-            id: None,
+            id: Some(params.id.parse().unwrap()),
             name: form_data.name,
             description: form_data.description,
-            src: form_data.src,
-            docs: form_data.docs,
-            demo: form_data.demo,
-            preview_img: form_data.preview_img,
+            src: form_data.src.into(),
+            docs: form_data.docs.into(),
+            demo: form_data.demo.into(),
+            preview_img: form_data.preview_img.into(),
             favourite: form_data.favourite.parse().unwrap_or(false),
-            technologies: vec![],
+            technologies: form_data.technologies,
         },
     )
     .await
     .unwrap();
+    let projects = utils::render_project_tree(&db_pool).await;
+    match state
+        .store
+        .lock()
+        .unwrap()
+        .insert("project".to_string(), projects)
+    {
+        None => log::debug!("KV value updated"),
+        Some(_) => log::debug!("KV value created"),
+    };
     Redirect::to("/admin/project")
         .see_other()
         .respond_to(&request)
@@ -288,6 +333,7 @@ struct AdminProjectNewProps {
     demo: Option<String>,
     preview_img: Option<String>,
     favourite: String,
+    technologies: Vec<String>,
 }
 
 #[derive(serde::Deserialize)]

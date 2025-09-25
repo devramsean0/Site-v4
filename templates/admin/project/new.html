@@ -10,6 +10,7 @@
     {% call form::input("", "demo", "Demo", "false", "") %}
     {% call form::input("file", "preview_img", "Preview IMG", "false", "") %}
     {% call form::input("checkbox", "favourite", "Favourite", "false", "true") %}
+    {% call form::input("", "technologies", "Technologies (comma seperated)", "true", "") %}
     {% call form::submit_button("Post") %}
 </form>
 {%endblock admincontent%}

@@ -20,6 +20,7 @@ mod db;
 mod middleware;
 mod routes;
 mod templates;
+mod types;
 mod utils;
 mod websocket_channel;
 mod workers;

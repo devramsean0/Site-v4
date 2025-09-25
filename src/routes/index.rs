@@ -44,7 +44,22 @@ pub async fn index_get(state: web::Data<AppState>, db_pool: web::Data<Arc<Pool>>
             Some(_) => log::debug!("KV value created"),
         };
     }
-
+    let mut project = match state.store.lock().unwrap().get("project") {
+        Some(value) => value.to_owned(),
+        _ => String::new(),
+    };
+    if project == String::new() {
+        project = utils::render_project_tree(&db_pool).await;
+        match state
+            .store
+            .lock()
+            .unwrap()
+            .insert("project".to_string(), project.clone())
+        {
+            None => log::debug!("KV value updated"),
+            Some(_) => log::debug!("KV value created"),
+        };
+    };
     let html = IndexTemplate {
         title: "Sean Outram",
         spotify_widget: spotify,
@@ -60,6 +75,7 @@ pub async fn index_get(state: web::Data<AppState>, db_pool: web::Data<Arc<Pool>>
             .filter(|x| x.e_type == "Education")
             .cloned()
             .collect(),
+        project,
     };
 
     HttpResponse::Ok().body(html.render().expect("Template should be valid"))

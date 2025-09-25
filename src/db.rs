@@ -6,6 +6,7 @@ use rusqlite::{Error, Row};
 use crate::{
     routes::admin::{experience::AdminExperienceSelectProps, projects::AdminProjectSelectProps},
     ternary,
+    types::DisplayOption,
 };
 
 const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -278,19 +279,22 @@ pub struct Project {
     pub id: Option<i64>,
     pub name: String,
     pub description: String,
-    pub src: Option<String>,
-    pub docs: Option<String>,
-    pub demo: Option<String>,
-    pub preview_img: Option<String>,
+    pub src: DisplayOption<String>,
+    pub docs: DisplayOption<String>,
+    pub demo: DisplayOption<String>,
+    pub preview_img: DisplayOption<String>,
     pub favourite: bool,
     pub technologies: Vec<String>,
 }
 
 impl Project {
     fn map_from_row(row: &Row) -> Result<Self, Error> {
-        let technologies_json: String = row.get(8)?;
+        let mut technologies_json: String = row.get(8)?;
+        technologies_json.replace_range(0..6, "");
+        technologies_json = technologies_json.replace("')", "");
 
         // Parse the JSON string back into a Vec<String>
+        serde_json::from_str::<Vec<String>>(&technologies_json).unwrap();
         let technologies: Vec<String> =
             serde_json::from_str(&technologies_json).unwrap_or_else(|_| Vec::new());
         let favourite_int: i64 = row.get(7)?;
@@ -335,8 +339,9 @@ impl Project {
     }
     pub async fn insert(pool: &Pool, data: Project) -> Result<(), async_sqlite::Error> {
         let mut technolgies_string = "json('[".to_string();
-        for tech in data.technologies {
-            technolgies_string.push_str(format!("\"{tech}\",").as_str());
+        for (i, tech) in data.technologies.iter().enumerate() {
+            technolgies_string
+                .push_str(format!("{}\"{tech}\"", ternary!(i == 0 => "", ",")).as_str());
         }
         technolgies_string.push_str("]')");
         pool.conn(move |conn| {
@@ -366,7 +371,7 @@ impl Project {
         }
         technolgies_string.push_str("]')");
         pool.conn(move |conn| {
-            let mut stmt = conn.prepare("UPDATE project SET name = ?1, description = ?2, src = ?3, docs = ?4, demo = ?5, preview_img = ?6, favourite = ?7, technologies = ?8 WHERE id = ?8").unwrap();
+            let mut stmt = conn.prepare("UPDATE project SET name = ?1, description = ?2, src = ?3, docs = ?4, demo = ?5, preview_img = ?6, favourite = ?7, technologies = ?8 WHERE id = ?9").unwrap();
             stmt.execute([
                 data.name,
                 data.description,

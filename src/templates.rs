@@ -1,5 +1,6 @@
 use crate::{db, utils::OrganizedExperienceCompany};
 use askama::Template;
+use std::fmt;
 
 #[derive(Template)]
 #[template(path = "index.html")]
@@ -8,6 +9,7 @@ pub struct IndexTemplate<'a> {
     pub spotify_widget: String,
     pub experiences: Vec<OrganizedExperienceCompany>,
     pub education: Vec<OrganizedExperienceCompany>,
+    pub project: String,
 }
 
 #[derive(Template)]
@@ -79,4 +81,11 @@ pub struct AdminProjectEditTemplate<'a> {
     pub title: &'a str,
     pub error: Option<&'a str>,
     pub project: db::Project,
+}
+
+#[derive(Template)]
+#[template(path = "parts/project.html")]
+pub struct ProjectPartTemplate {
+    pub technologies: Vec<(String, i64)>,
+    pub records: Vec<db::Project>,
 }
