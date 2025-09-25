@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 FROM nixos/nix:latest AS go_build
-RUN nix-env -iA nixpkgs.go
+RUN nix-env -iA nixpkgs.go nixpkgs.glibc.dev nixpkgs.sqlite
 WORKDIR /build/go
 COPY tools .
 RUN go mod download -C ./nr-station-parser
