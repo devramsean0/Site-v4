@@ -4,6 +4,7 @@
 /compiled_assets
 /uploads
 /node_modules
+/dist
 .direnv
 
 /.pre-commit-config.yaml

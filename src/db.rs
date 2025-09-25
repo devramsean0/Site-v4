@@ -80,6 +80,29 @@ pub async fn create_tables(pool: &Pool) -> Result<(), async_sqlite::Error> {
             [],
         )
         .unwrap();
+        // train_operator
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS train_operator (
+            name TEXT NOT NULL,
+            atoc_code TEXT NOT NULL,
+            logo TEXT NOT NULL,
+            legalName TEXT NOT NULL UNIQUE
+        )",
+            [],
+        )
+        .unwrap();
+        // train_station
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS train_station (
+            name TEXT NOT NULL,
+            longitude TEXT NOT NULL,
+            latitude TEXT NOT NULL,
+            code TEXT NOT NULL UNIQUE,
+            nationalLocationCode TEXT NOT NULL UNIQUE
+        )",
+            [],
+        )
+        .unwrap();
         Ok(())
     })
     .await?;
