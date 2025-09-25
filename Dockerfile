@@ -4,6 +4,7 @@ FROM nixos/nix:latest AS go_build
 RUN nix-env -iA nixpkgs.go
 WORKDIR /build/go
 COPY tools .
+RUN go mod download -C ./nr-station-parser
 RUN CGO_ENABLED=1 go build -C ./nr-station-parser -o ../nr-station-parser -v
 
 FROM nixos/nix:latest AS rs_build
