@@ -67,14 +67,16 @@ pub async fn guestlog(verbose: bool, api_key: String, base_id: String) -> Result
 
 #[derive(serde::Deserialize)]
 struct AirtableListReq {
-    offset: Option<String>,
+    #[serde(rename = "offset")]
+    _offset: Option<String>,
     records: Vec<AirtableRow>,
 }
 #[derive(serde::Deserialize)]
 struct AirtableRow {
-    id: String,
+    #[serde(rename = "id")]
+    _id: String,
     #[serde(rename = "createdTime")]
-    created_time: String,
+    _created_time: String,
     fields: GuestlogData,
 }
 #[derive(serde::Deserialize)]

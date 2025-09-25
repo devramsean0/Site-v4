@@ -29,13 +29,16 @@ enum Commands {
     Guestlog {},
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     dotenv::dotenv().ok();
     let cli = Cli::parse();
     debug("Debug logging enabled", cli.verbose);
     match &cli.command {
         Commands::Guestlog {} => {
-            commands::guestlog::guestlog(cli.verbose, cli.api_key, cli.base_id);
+            commands::guestlog::guestlog(cli.verbose, cli.api_key, cli.base_id)
+                .await
+                .unwrap();
         }
     }
 }
