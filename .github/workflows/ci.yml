@@ -27,7 +27,7 @@ jobs:
           username: devramsean0
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build Docker image
-        run: docker build -t ghcr.io/devramsean0/site-v4:latest .
+        run: docker build -t ghcr.io/devramsean0/site-v4:latest --build-arg PUBLIC_WEBSOCKET_PROTOCOL=wss .
       - name: Push Docker image
         run: docker push ghcr.io/devramsean0/site-v4:latest
   deploy:
