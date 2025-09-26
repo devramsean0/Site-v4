@@ -8,6 +8,9 @@ RUN CGO_ENABLED=1 go build -C ./nr-station-parser -o ../nr-station-parser -v
 
 FROM nixos/nix:latest AS rs_build
 
+ARG PUBLIC_WEBSOCKET_PROTOCOL
+ENV PUBLIC_WEBSOCKET_PROTOCOL=$PUBLIC_WEBSOCKET_PROTOCOL
+
 # Install packages using Nix
 RUN nix-env -iA nixpkgs.gcc nixpkgs.openssl nixpkgs.openssl.dev nixpkgs.pkg-config nixpkgs.bun nixpkgs.tailwindcss_4 nixpkgs.rustc nixpkgs.cargo
 

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{%- import "parts/form.html" as form -%}
 {% block content %}
 <div data-controller="websocket" data-websocket-channel-value="spotify" hidden></div>
 <header class="h-screen flex flex-col justify-center items-center bg-header text-black">
@@ -93,4 +93,33 @@
     </div>
 </section>
 {{ project|safe }}
+<section id="guestlog" class="bg-s3 min-h-screen max-h-fit" data-controller="websocket"
+    data-websocket-channel-value="guestlog">
+    <h2 class="text-5xl text-white font-bold text-center py-5">Guestlog</h2>
+    <section>
+        <form class="flex items-center justify-center flex-col gap-4 text-white">
+            <div class="flex flex-col">
+                <label for="name">Name</label>
+                <input class="text-black rounded-lg p-2 bg-white" name="name" required />
+            </div>
+            <div class="flex flex-col">
+                <label for="email">Email</label>
+                <input class="text-black rounded-lg p-2 bg-white" name="email" required type="email" />
+            </div>
+            <div class="flex flex-col">
+                <label for="avatar">Avatar</label>
+                <input class="text-black rounded-lg p-2 bg-white" name="avatar" required type="file" />
+            </div>
+            <div class="flex flex-col">
+                <label for="message">Message</label>
+                <textarea class="text-black rounded-lg p-2 bg-white" name="message" required></textarea>
+            </div>
+            <button type="submit" class="px-5 py-1 rounded-lg text-black bg-white hover:bg-blue-500">Post on the
+                log</button>
+        </form>
+    </section>
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 pt-4 gap-5 text-black">
+
+    </section>
+</section>
 {%endblock content%}
