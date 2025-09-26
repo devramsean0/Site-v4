@@ -17,7 +17,9 @@ use crate::{
     assets,
     db::{self, Project},
     templates::{AdminProjectEditTemplate, AdminProjectListTemplate, AdminProjectNewTemplate},
-    utils, AppState,
+    utils,
+    websocket_channel::{ChannelsActor, Publish},
+    AppState,
 };
 
 #[get("/project")]
@@ -78,6 +80,8 @@ pub async fn project_new_post(
     db_pool: web::Data<Arc<Pool>>,
     session: Session,
     state: web::Data<AppState>,
+    channels: web::Data<actix::Addr<ChannelsActor>>,
+
     mut payload: Multipart,
 ) -> HttpResponse {
     let mut form_data = AdminProjectNewProps::default();
@@ -150,11 +154,15 @@ pub async fn project_new_post(
         .store
         .lock()
         .unwrap()
-        .insert("project".to_string(), projects)
+        .insert("project".to_string(), projects.clone())
     {
         None => log::debug!("KV value updated"),
         Some(_) => log::debug!("KV value created"),
     };
+    channels.do_send(Publish {
+        channel: "project".to_string(),
+        payload: projects,
+    });
     Redirect::to("/admin/project")
         .see_other()
         .respond_to(&request)
@@ -168,6 +176,7 @@ pub async fn project_delete(
     request: HttpRequest,
     db_pool: web::Data<Arc<Pool>>,
     session: Session,
+    channels: web::Data<actix::Addr<ChannelsActor>>,
 ) -> HttpResponse {
     if utils::verify_admin_authentication(&session, &db_pool)
         .await
@@ -187,11 +196,15 @@ pub async fn project_delete(
         .store
         .lock()
         .unwrap()
-        .insert("project".to_string(), projects)
+        .insert("project".to_string(), projects.clone())
     {
         None => log::debug!("KV value updated"),
         Some(_) => log::debug!("KV value created"),
     };
+    channels.do_send(Publish {
+        channel: "project".to_string(),
+        payload: projects,
+    });
     HttpResponse::Ok().status(StatusCode::NO_CONTENT).finish()
 }
 
@@ -233,6 +246,7 @@ pub async fn project_edit_post(
     request: HttpRequest,
     db_pool: web::Data<Arc<Pool>>,
     session: Session,
+    channels: web::Data<actix::Addr<ChannelsActor>>,
     mut payload: Multipart,
 ) -> HttpResponse {
     if utils::verify_admin_authentication(&session, &db_pool)
@@ -313,11 +327,15 @@ pub async fn project_edit_post(
         .store
         .lock()
         .unwrap()
-        .insert("project".to_string(), projects)
+        .insert("project".to_string(), projects.clone())
     {
         None => log::debug!("KV value updated"),
         Some(_) => log::debug!("KV value created"),
     };
+    channels.do_send(Publish {
+        channel: "project".to_string(),
+        payload: projects,
+    });
     Redirect::to("/admin/project")
         .see_other()
         .respond_to(&request)
