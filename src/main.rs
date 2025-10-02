@@ -125,7 +125,12 @@ async fn main() -> std::io::Result<()> {
                     .service(routes::admin::projects::project_new_post)
                     .service(routes::admin::projects::project_delete)
                     .service(routes::admin::projects::project_edit_get)
-                    .service(routes::admin::projects::project_edit_post),
+                    .service(routes::admin::projects::project_edit_post)
+                    // Guestlog
+                    .service(routes::admin::guestlog::guestlog_list)
+                    .service(routes::admin::guestlog::guestlog_delete)
+                    .service(routes::admin::guestlog::guestlog_activestate)
+                    .service(routes::admin::guestlog::experience_new_post),
             )
     })
     .bind((host.clone(), port))?

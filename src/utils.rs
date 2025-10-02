@@ -9,7 +9,10 @@ use askama::Template;
 use async_sqlite::Pool;
 use reqwest::StatusCode;
 
-use crate::{db, templates::ProjectPartTemplate};
+use crate::{
+    db,
+    templates::{GuestlogPartTemplate, ProjectPartTemplate},
+};
 
 #[macro_export]
 macro_rules! ternary {
@@ -141,6 +144,14 @@ pub fn run_station_parser() {
         .env("NR_STATION_API_KEY", station_api_key)
         .status()
         .expect("Command has executed");
+}
+
+pub async fn render_guestlog_entries(pool: &web::Data<Arc<Pool>>) -> String {
+    let records = db::Guestlog::active(pool).await.unwrap();
+    let html = GuestlogPartTemplate { guestlogs: records }
+        .render()
+        .expect("template should be valid");
+    html
 }
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq, Clone, Debug)]

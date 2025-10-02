@@ -5,6 +5,7 @@ use crate::templates::AdminOptionsTemplate;
 
 pub mod authentication;
 pub mod experience;
+pub mod guestlog;
 pub mod projects;
 
 #[get("/")]

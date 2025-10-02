@@ -4,7 +4,10 @@ use rand::Rng;
 use rusqlite::{Error, Row};
 
 use crate::{
-    routes::admin::{experience::AdminExperienceSelectProps, projects::AdminProjectSelectProps},
+    routes::admin::{
+        experience::AdminExperienceSelectProps, guestlog::GuestlogSelectProps,
+        projects::AdminProjectSelectProps,
+    },
     ternary,
     types::DisplayOption,
 };
@@ -74,7 +77,6 @@ pub async fn create_tables(pool: &Pool) -> Result<(), async_sqlite::Error> {
             email TEXT NOT NULL,
             message TEXT NOT NULL,
             active INTEGER NOT NULL,
-            gravatar_url TEXT,
             avatar TEXT
         )",
             [],
@@ -103,6 +105,7 @@ pub async fn create_tables(pool: &Pool) -> Result<(), async_sqlite::Error> {
             [],
         )
         .unwrap();
+
         Ok(())
     })
     .await?;
@@ -436,5 +439,101 @@ impl Project {
     }
     pub fn get_preview_img(&self) -> &str {
         self.preview_img.as_deref().unwrap()
+    }
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq)]
+pub struct Guestlog {
+    pub id: Option<i64>,
+    pub name: String,
+    pub email: String,
+    pub message: String,
+    pub active: bool,
+    pub avatar: DisplayOption<String>,
+}
+
+impl Guestlog {
+    fn map_from_row(row: &Row) -> Result<Self, Error> {
+        let active_int: i64 = row.get(4)?;
+        let active = active_int == 1;
+        Ok(Self {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            email: row.get(2)?,
+            message: row.get(3)?,
+            active,
+            avatar: row.get(5)?,
+        })
+    }
+    pub async fn get_by_id(id: String, pool: &Pool) -> Result<Option<Self>, async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("SELECT * FROM guestlog WHERE id = ?1")?;
+            let user = match stmt.query_one([id], |row| Self::map_from_row(row)) {
+                Ok(user) => Some(user),
+                _ => None,
+            };
+            Ok(user)
+        })
+        .await
+    }
+    pub async fn all(pool: &Pool) -> Result<Vec<Self>, async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("SELECT * FROM guestlog")?;
+            let status_iter = stmt
+                .query_map([], |row| Ok(Self::map_from_row(row).unwrap()))
+                .unwrap();
+
+            let mut statuses = Vec::new();
+            for status in status_iter {
+                statuses.push(status?);
+            }
+            Ok(statuses)
+        })
+        .await
+    }
+    pub async fn active(pool: &Pool) -> Result<Vec<Self>, async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("SELECT * FROM guestlog WHERE active=1;")?;
+            let status_iter = stmt
+                .query_map([], |row| Ok(Self::map_from_row(row).unwrap()))
+                .unwrap();
+
+            let mut statuses = Vec::new();
+            for status in status_iter {
+                statuses.push(status?);
+            }
+            Ok(statuses)
+        })
+        .await
+    }
+    pub async fn insert(pool: &Pool, data: Guestlog) -> Result<(), async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("INSERT INTO guestlog (name, email, message, active, avatar) VALUES (?1, ?2, ?3, ?4, ?5)").unwrap();
+            stmt.execute([data.name, data.email, data.message, ternary!(data.active => "1".to_string(), "0".to_string()), data.avatar.unwrap()])?;
+            Ok(())
+        })
+        .await?;
+        Ok(())
+    }
+    pub async fn delete(pool: &Pool, data: GuestlogSelectProps) -> Result<(), async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("DELETE FROM guestlog WHERE id = ?1").unwrap();
+            stmt.execute([data.id.to_owned()])?;
+            Ok(())
+        })
+        .await?;
+        Ok(())
+    }
+    pub async fn set_activestate(pool: &Pool, id: String) -> Result<(), async_sqlite::Error> {
+        let log = Self::get_by_id(id.clone(), &pool).await.unwrap().unwrap();
+        pool.conn(move |conn| {
+            let mut stmt = conn
+                .prepare("UPDATE guestlog SET active = ?1 WHERE id = ?2")
+                .unwrap();
+            stmt.execute([if log.active { 0 } else { 1 }, id.parse::<i64>().unwrap()])?;
+            Ok(())
+        })
+        .await?;
+        Ok(())
     }
 }

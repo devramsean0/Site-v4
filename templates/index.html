@@ -97,29 +97,31 @@
     data-websocket-channel-value="guestlog">
     <h2 class="text-5xl text-white font-bold text-center py-5">Guestlog</h2>
     <section>
-        <form class="flex items-center justify-center flex-col gap-4 text-white">
+        <form class="flex items-center justify-center flex-col gap-4 text-white" method="post"
+            enctype="multipart/form-data" action="/admin/guestlog">
             <div class="flex flex-col">
                 <label for="name">Name</label>
-                <input class="text-black rounded-lg p-2 bg-white" name="name" required />
+                <input class="text-black rounded-lg p-2 bg-white" id="name" name="name" required />
             </div>
             <div class="flex flex-col">
                 <label for="email">Email</label>
-                <input class="text-black rounded-lg p-2 bg-white" name="email" required type="email" />
+                <input class="text-black rounded-lg p-2 bg-white" id="email" name="email" required type="email" />
             </div>
             <div class="flex flex-col">
                 <label for="avatar">Avatar</label>
-                <input class="text-black rounded-lg p-2 bg-white" name="avatar" required type="file" />
+                <input class="text-black rounded-lg p-2 bg-white" id="avatar" name="avatar" required type="file" />
             </div>
             <div class="flex flex-col">
                 <label for="message">Message</label>
-                <textarea class="text-black rounded-lg p-2 bg-white" name="message" required></textarea>
+                <textarea class="text-black rounded-lg p-2 bg-white" id="message" name="message" required></textarea>
             </div>
             <button type="submit" class="px-5 py-1 rounded-lg text-black bg-white hover:bg-blue-500">Post on the
                 log</button>
         </form>
     </section>
-    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 pt-4 gap-5 text-black">
-
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 pt-4 gap-5 text-black" data-controller="guestlog"
+        data-action="wsmessage@document->guestlog#recieved" data-guestlog-target="output">
+        {{ guestlog|safe }}
     </section>
 </section>
 {%endblock content%}
