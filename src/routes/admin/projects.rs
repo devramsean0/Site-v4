@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use actix_multipart::{form, Multipart};
+use actix_multipart::Multipart;
 use actix_session::Session;
 use actix_web::{
     delete, get,

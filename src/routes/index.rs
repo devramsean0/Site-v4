@@ -4,7 +4,7 @@ use actix_web::{get, web, HttpResponse};
 use askama::Template;
 use async_sqlite::Pool;
 
-use crate::{db, templates::IndexTemplate, utils, AppState};
+use crate::{templates::IndexTemplate, utils, AppState};
 
 #[get("/")]
 pub async fn index_get(state: web::Data<AppState>, db_pool: web::Data<Arc<Pool>>) -> HttpResponse {

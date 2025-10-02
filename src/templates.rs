@@ -1,6 +1,5 @@
 use crate::{db, utils::OrganizedExperienceCompany};
 use askama::Template;
-use std::fmt;
 
 #[derive(Template)]
 #[template(path = "index.html")]

@@ -114,6 +114,7 @@ pub async fn create_tables(pool: &Pool) -> Result<(), async_sqlite::Error> {
 
 #[derive(Debug, Clone)]
 pub struct AdminUser {
+    #[allow(dead_code)]
     pub email: String,
     pub password: String,
 }

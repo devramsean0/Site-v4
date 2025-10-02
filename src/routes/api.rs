@@ -1,5 +1,6 @@
 use actix_web::{get, http::StatusCode, web, HttpRequest, HttpResponse};
 use askama::Template;
+use base64::Engine;
 use serde::Deserialize;
 use serde_json::json;
 
@@ -41,8 +42,8 @@ pub async fn api_spotify_get(
     {
         return HttpResponse::Ok().status(StatusCode::UNAUTHORIZED).finish();
     }
-    let basic_auth =
-        base64::encode(format!("{spotify_client_id}:{spotify_client_secret}").as_str());
+    let basic_auth = base64::engine::general_purpose::STANDARD
+        .encode(format!("{spotify_client_id}:{spotify_client_secret}").as_bytes());
 
     let client = reqwest::Client::builder()
         .user_agent(APP_USER_AGENT)

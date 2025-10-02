@@ -7,7 +7,6 @@ use actix_web::{
 };
 use async_sqlite::PoolBuilder;
 use std::{
-    cell::Cell,
     collections::HashMap,
     io::{Error, ErrorKind},
     sync::{Arc, Mutex},

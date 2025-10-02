@@ -1,7 +1,4 @@
-use std::{
-    process::{Command, ExitCode, ExitStatus},
-    sync::Arc,
-};
+use std::{process::Command, sync::Arc};
 
 use actix_session::Session;
 use actix_web::web;
@@ -49,7 +46,7 @@ pub async fn verify_admin_authentication(
     session: &Session,
     pool: &web::Data<Arc<Pool>>,
 ) -> Result<bool, anyhow::Error> {
-    let mut session_id = match session.get::<String>("session_id") {
+    let session_id = match session.get::<String>("session_id") {
         Ok(Some(id)) => id,
         _ => {
             log::debug!("Missing Session token");
