@@ -60,10 +60,12 @@ pub async fn guestlog(verbose: bool, api_key: String, base_id: String) -> Result
                 .await
                 .unwrap();
             let mut filepath = "/".to_string();
+            let mut filename = String::new();
 
             while fs::exists(filepath.clone()).unwrap() {
                 let prefix = random::get_string(16, true, false, true, false);
-                filepath = format!("{upload_folder}/imported-{prefix}.png");
+                filename = format!("{prefix}-{filename}");
+                filepath = format!("{upload_folder}/{filename}");
             }
 
             let mut pos = 0;
@@ -72,7 +74,7 @@ pub async fn guestlog(verbose: bool, api_key: String, base_id: String) -> Result
                 let bytes_written = fs::File::write(&mut file, &avatar_data[pos..]).unwrap();
                 pos += bytes_written
             }
-            avatar_path = filepath;
+            avatar_path = filename;
         }
         pool.conn(move |conn| {
             conn.execute(
@@ -115,4 +117,9 @@ struct GuestlogData {
     message: String,
     active: bool,
     gravatar_url: Option<String>,
+}
+
+pub struct AssetFilenameParts {
+    pub filename: String,
+    pub path: String,
 }
