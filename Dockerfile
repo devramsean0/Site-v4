@@ -34,7 +34,7 @@ FROM nixos/nix:latest AS runner
 WORKDIR /app
 
 # Install runtime dependencies (if any)
-RUN nix-env -iA nixpkgs.openssl
+RUN nix-env -iA nixpkgs.openssl nixpkgs.sqlite
 
 # Copy built binary and assets from build stage
 COPY --from=rs_build /app/target/release/site-v4 /app/site-v4
