@@ -132,6 +132,7 @@ pub async fn guestlog_delete(
     request: HttpRequest,
     db_pool: web::Data<Arc<Pool>>,
     session: Session,
+    channels: web::Data<actix::Addr<ChannelsActor>>,
 ) -> HttpResponse {
     if utils::verify_admin_authentication(&session, &db_pool)
         .await
@@ -151,11 +152,15 @@ pub async fn guestlog_delete(
         .store
         .lock()
         .unwrap()
-        .insert("guestlog".to_string(), tree)
+        .insert("guestlog".to_string(), tree.clone())
     {
         None => log::debug!("KV value updated"),
         Some(_) => log::debug!("KV value created"),
     };
+    channels.do_send(Publish {
+        channel: "project".to_string(),
+        payload: tree,
+    });
     HttpResponse::Ok().status(StatusCode::NO_CONTENT).finish()
 }
 
@@ -166,6 +171,7 @@ pub async fn guestlog_activestate(
     request: HttpRequest,
     db_pool: web::Data<Arc<Pool>>,
     session: Session,
+    channels: web::Data<actix::Addr<ChannelsActor>>,
 ) -> HttpResponse {
     if !utils::verify_admin_authentication(&session, &db_pool)
         .await
@@ -184,11 +190,15 @@ pub async fn guestlog_activestate(
         .store
         .lock()
         .unwrap()
-        .insert("guestlog".to_string(), tree)
+        .insert("guestlog".to_string(), tree.clone())
     {
         None => log::debug!("KV value updated"),
         Some(_) => log::debug!("KV value created"),
     };
+    channels.do_send(Publish {
+        channel: "project".to_string(),
+        payload: tree,
+    });
     HttpResponse::Ok().status(StatusCode::NO_CONTENT).finish()
 }
 #[derive(serde::Deserialize, Debug, Default, Clone)]

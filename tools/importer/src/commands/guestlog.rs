@@ -1,15 +1,18 @@
-use std::io::{Error, ErrorKind};
-
 use async_sqlite::PoolBuilder;
+use random_str as random;
+use std::fs::{self, File, OpenOptions};
+use std::io::{Cursor, Error, ErrorKind, Write};
 
 use crate::ternary;
 
 pub async fn guestlog(verbose: bool, api_key: String, base_id: String) -> Result<(), Error> {
     let db_url = std::env::var("DB_URL").unwrap_or_else(|_| String::from("./db.sqlite3"));
+    let upload_folder: String =
+        std::env::var("UPLOADS_PATH").unwrap_or_else(|_| "./uploads".to_string());
     crate::logger::debug("Importing Guestlog from airtable", verbose);
-    let client = reqwest::blocking::Client::builder()
+    let client = reqwest::Client::builder()
         .user_agent(format!(
-            "Sean Outram Data Importer {}",
+            "Sean's Site Data Importer {}",
             env!("CARGO_PKG_VERSION")
         ))
         .build()
@@ -35,26 +38,52 @@ pub async fn guestlog(verbose: bool, api_key: String, base_id: String) -> Result
         ))
         .bearer_auth(api_key)
         .send()
+        .await
         .unwrap()
         .json::<AirtableListReq>()
+        .await
         .unwrap();
     crate::logger::info(format!(
         "Grabbed {} records",
         airtable_records.records.len()
     ));
-
     for record in airtable_records.records {
+        let mut avatar_path = String::new();
+        // Fetch avatar
+        if record.fields.gravatar_url.is_some() {
+            let avatar_data = client
+                .get(record.fields.gravatar_url.unwrap())
+                .send()
+                .await
+                .unwrap()
+                .bytes()
+                .await
+                .unwrap();
+            let mut filepath = "/".to_string();
+
+            while fs::exists(filepath.clone()).unwrap() {
+                let prefix = random::get_string(16, true, false, true, false);
+                filepath = format!("{upload_folder}/imported-{prefix}.png");
+            }
+
+            let mut pos = 0;
+            let mut file = File::create(&filepath).unwrap();
+            while pos < avatar_data.len() {
+                let bytes_written = fs::File::write(&mut file, &avatar_data[pos..]).unwrap();
+                pos += bytes_written
+            }
+            avatar_path = filepath;
+        }
         pool.conn(move |conn| {
             conn.execute(
-                "INSERT INTO guestlog (name, email, message, active, gravatar_url, avatar)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7) ON CONFLICT DO NOTHING",
+                "INSERT INTO guestlog (name, email, message, active, avatar)
+            VALUES (?1, ?2, ?3, ?4, ?5) ON CONFLICT DO NOTHING",
                 [
                     record.fields.name,
                     record.fields.email,
                     record.fields.message,
                     ternary!(record.fields.active => "1".to_string(), "0".to_string()),
-                    record.fields.gravatar_url.unwrap_or_default(),
-                    String::new(),
+                    avatar_path,
                 ],
             )
         })
