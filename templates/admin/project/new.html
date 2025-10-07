@@ -9,7 +9,7 @@
     {% call form::input("", "docs", "Docs", "false", "") %}
     {% call form::input("", "demo", "Demo", "false", "") %}
     {% call form::input("file", "preview_img", "Preview IMG", "false", "") %}
-    {% call form::checkbox("favourite", "Favourite", "false", project.favourite) %}
+    {% call form::checkbox("favourite", "Favourite", "false", false) %}
 
     {% call form::input("", "technologies", "Technologies (comma seperated)", "true", "") %}
     {% call form::submit_button("Post") %}
