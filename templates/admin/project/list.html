@@ -23,7 +23,7 @@
         <td>{{ project.get_demo() }}</td>
         <td><img src="/uploads/{{ project.get_preview_img() }}" width="200" height="200" /></td>
         <td>
-            <input type="checkbox" value="{{ project.favourite}}" readonly="true" />
+            <input type="checkbox" {% if checked==true %}checked{% endif %} readonly="true" />
         <td>
             <ul>
                 {% for tech in project.technologies %}

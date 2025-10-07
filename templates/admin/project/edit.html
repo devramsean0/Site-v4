@@ -10,7 +10,7 @@
     {% call form::input("", "demo", "Demo", "false", project.get_demo()) %}
     <img src="/uploads/{{ project.get_preview_img() }}" />
     {% call form::input("file", "preview_img", "Preview IMG", "false", project.get_preview_img()) %}
-    {% call form::input("checkbox", "favourite", "Favourite", "true", project.favourite) %}
+    {% call form::checkbox("favourite", "Favourite", "false", project.favourite) %}
     {% call form::submit_button("Edit") %}
 </form>
 {%endblock admincontent%}

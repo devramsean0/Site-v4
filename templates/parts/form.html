@@ -21,3 +21,11 @@
     </select>
 </div>
 {% endmacro %}
+
+{% macro checkbox(name, label, required, checked) %}
+<div class="flex flex-col">
+    <label for="{{ name }}">{{ label }}:</label>
+    <input name="{{ name }}" type="checkbox" id="{{ name }}" {% if checked==true %}checked{% endif %} {% if
+        required=="true" %}required{% endif %} class="border-1 border-white p-1 rounded-md" />
+</div>
+{% endmacro %}
