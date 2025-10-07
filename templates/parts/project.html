@@ -4,8 +4,8 @@
     <h2 class="text-5xl text-white font-bold text-center py-5">Projects</h2>
     <div class="flex flex-col gap-2">
         {% for tech in technologies %}
-        <div class="p-1 rounded-full border-white border-2 min-w-fit"
-            style="background-color: white; width: {{100 / records.len() * tech.1 as usize}}%">
+        <div class="p-1 rounded-full border-white border-2 max-w-screen"
+            style="background-color: white; width: {{100 / technologies.len() * tech.1 as usize}}%">
             <h2 class="pl-4 text-2xl">{{tech.0}}: {{tech.1}}</h2>
         </div>
         {% endfor %}
