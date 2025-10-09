@@ -29,7 +29,7 @@
                     </div>
                 </div>
                 <div class="flex justify-end gap-3">
-                    {% if project.src.is_some() %}
+                    {% if project.get_src() != "" %}
                     <a href="{{project.src}}" target="_blank" rel="noopener noreferrer">
                         <svg width="32" height="32" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" clip-rule="evenodd"
@@ -38,7 +38,7 @@
                         </svg>
                     </a>
                     {% endif %}
-                    {% if project.demo.is_some() %}
+                    {% if project.get_demo() != "" %}
                     <a href="{{project.demo}}" target="_blank" rel="noopener noreferrer">
                         <svg width="32" height="32" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" clip-rule="evenodd"
@@ -48,7 +48,7 @@
 
                     </a>
                     {% endif %}
-                    {% if project.docs.is_some() %}
+                    {% if project.get_docs() != "" %}
                     <a href="{{project.docs}}" target="_blank" rel="noopener noreferrer">
                         <svg width="32" height="32" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" clip-rule="evenodd"
