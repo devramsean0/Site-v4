@@ -11,6 +11,7 @@
     <img src="/uploads/{{ project.get_preview_img() }}" />
     {% call form::input("file", "preview_img", "Preview IMG", "false", project.get_preview_img()) %}
     {% call form::checkbox("favourite", "Favourite", "false", project.favourite) %}
+    {% call form::input("", "technologies", "Technologies (comma seperated)", "true", project.get_technologies()) %}
     {% call form::submit_button("Edit") %}
 </form>
 {%endblock admincontent%}

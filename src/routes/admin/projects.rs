@@ -126,7 +126,8 @@ pub async fn project_new_post(
                 let raw = String::from_utf8_lossy(&value).to_string();
                 let split = raw
                     .split(',')
-                    .map(|val| val.to_string())
+                    .map(|val| val.trim().to_string())
+                    .filter(|val| !val.is_empty())
                     .collect::<Vec<String>>();
                 form_data.technologies = split
             }
@@ -301,8 +302,10 @@ pub async fn project_edit_post(
                 let raw = String::from_utf8_lossy(&value).to_string();
                 let split = raw
                     .split(',')
-                    .map(|val| val.to_string())
+                    .map(|val| val.trim().to_string())
+                    .filter(|val| !val.is_empty())
                     .collect::<Vec<String>>();
+                println!("Split: {:#?}", split);
                 form_data.technologies = split
             }
             _ => {}

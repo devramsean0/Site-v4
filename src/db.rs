@@ -407,8 +407,9 @@ impl Project {
     }
     pub async fn update(pool: &Pool, data: Project) -> Result<(), async_sqlite::Error> {
         let mut technolgies_string = "json('[".to_string();
-        for tech in data.technologies {
-            technolgies_string.push_str(format!("\"{tech}\",").as_str());
+        for (i, tech) in data.technologies.iter().enumerate() {
+            technolgies_string
+                .push_str(format!("{}\"{tech}\"", ternary!(i == 0 => "", ",")).as_str());
         }
         technolgies_string.push_str("]')");
         pool.conn(move |conn| {
@@ -440,6 +441,11 @@ impl Project {
     }
     pub fn get_preview_img(&self) -> &str {
         self.preview_img.as_deref().unwrap()
+    }
+    pub fn get_technologies(&self) -> String {
+        let string = &self.technologies;
+        let str_vec = string.join(", ");
+        str_vec
     }
 }
 
