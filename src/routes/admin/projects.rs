@@ -17,7 +17,7 @@ use crate::{
     assets,
     db::{self, Project},
     templates::{AdminProjectEditTemplate, AdminProjectListTemplate, AdminProjectNewTemplate},
-    utils,
+    ternary, utils,
     websocket_channel::{ChannelsActor, Publish},
     AppState,
 };
@@ -133,6 +133,8 @@ pub async fn project_new_post(
             _ => {}
         }
     }
+    form_data.favourite =
+        ternary!(form_data.favourite == "on" => true.to_string(), false.to_string()); // Hack because forms suck :(
     db::Project::insert(
         &db_pool,
         Project {
@@ -306,6 +308,8 @@ pub async fn project_edit_post(
             _ => {}
         }
     }
+    form_data.favourite =
+        ternary!(form_data.favourite == "on" => true.to_string(), false.to_string()); // Hack because forms suck :(
     db::Project::update(
         &db_pool,
         Project {
