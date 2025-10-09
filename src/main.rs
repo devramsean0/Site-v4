@@ -1,0 +1,149 @@
+use actix::{Actor, Addr};
+use actix_files::Files;
+use actix_session::{config::PersistentSession, storage::CookieSessionStore, SessionMiddleware};
+use actix_web::{
+    cookie::{self, Key},
+    middleware as ActixMiddleware, web, App, HttpServer,
+};
+use async_sqlite::PoolBuilder;
+use std::{
+    collections::HashMap,
+    io::{Error, ErrorKind},
+    sync::{Arc, Mutex},
+};
+
+use crate::websocket_channel::ChannelsActor;
+
+mod assets;
+mod db;
+mod middleware;
+mod routes;
+mod templates;
+mod types;
+mod utils;
+mod websocket_channel;
+mod workers;
+
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    dotenv::dotenv().ok();
+    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
+    let host = std::env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
+    let port = std::env::var("PORT")
+        .unwrap_or_else(|_| "3000".to_string())
+        .parse::<u16>()
+        .unwrap_or(3000);
+    let db_url = std::env::var("DB_URL").unwrap_or_else(|_| String::from("./db.sqlite3"));
+    let upload_folder: String =
+        std::env::var("UPLOADS_PATH").unwrap_or_else(|_| "./uploads".to_string());
+
+    // Create DB pool
+    let pool = match PoolBuilder::new().path(db_url).open().await {
+        Ok(pool) => {
+            log::info!("Established DB pool");
+            pool
+        }
+        Err(e) => {
+            log::error!("Error estalishing DB pool {e}");
+            return Err(Error::new(
+                ErrorKind::Other,
+                "database pool could not be established",
+            ));
+        }
+    };
+
+    match db::create_tables(&pool).await {
+        Ok(_) => log::info!("DB migrations ran"),
+        Err(err) => log::error!("Database migration error {err}"),
+    };
+
+    let db_pool_arc = Arc::new(pool.clone());
+
+    let ws_channels: Addr<ChannelsActor> = ChannelsActor::new().start();
+    let (s, ctrl_c) = async_channel::bounded(1);
+    let handle = move || {
+        s.try_send(()).ok();
+    };
+    ctrlc::set_handler(handle).unwrap();
+
+    // Spawn spotify worker after server has started
+    let spotify_worker = tokio::spawn({
+        let ctrl_c = ctrl_c.clone();
+        async move {
+            workers::spotify::register(ctrl_c).await.unwrap();
+        }
+    });
+    let nr_station_parser_worker = tokio::spawn({
+        let ctrl_c = ctrl_c.clone();
+        async move {
+            workers::nr_station_parser::register(ctrl_c).await.unwrap();
+        }
+    });
+
+    let state = web::Data::new(AppState {
+        store: Mutex::new(HashMap::new()),
+    });
+
+    let server = HttpServer::new(move || {
+        App::new()
+            .wrap(ActixMiddleware::Logger::default())
+            .wrap(
+                SessionMiddleware::builder(CookieSessionStore::default(), Key::from(&[0; 64]))
+                    //TODO will need to set to true in production
+                    .cookie_secure(false)
+                    // customize session and cookie expiration
+                    .session_lifecycle(
+                        PersistentSession::default().session_ttl(cookie::time::Duration::days(14)),
+                    )
+                    .build(),
+            )
+            .wrap(middleware::content_type::DefaultHtmlContentType)
+            .service(Files::new("compiled_assets/", "compiled_assets/"))
+            .service(Files::new("assets/", "assets/"))
+            .service(Files::new("uploads/", upload_folder.as_str()))
+            .app_data(web::Data::new(db_pool_arc.clone()))
+            .app_data(web::Data::new(ws_channels.clone()))
+            .app_data(state.clone())
+            .service(routes::index::index_get)
+            .service(routes::ws::ws_route)
+            .service(routes::api::api_spotify_get)
+            .service(routes::admin::authentication::admin_login_get)
+            .service(routes::admin::authentication::admin_login_post)
+            .service(
+                web::scope("/admin")
+                    .service(routes::admin::admin_get)
+                    .service(routes::admin::experience::experience_list)
+                    .service(routes::admin::experience::experience_new_get)
+                    .service(routes::admin::experience::experience_new_post)
+                    .service(routes::admin::experience::experience_delete)
+                    .service(routes::admin::experience::experience_edit_get)
+                    .service(routes::admin::experience::experience_edit_post)
+                    // Project
+                    .service(routes::admin::projects::project_list)
+                    .service(routes::admin::projects::project_new_get)
+                    .service(routes::admin::projects::project_new_post)
+                    .service(routes::admin::projects::project_delete)
+                    .service(routes::admin::projects::project_edit_get)
+                    .service(routes::admin::projects::project_edit_post)
+                    // Guestlog
+                    .service(routes::admin::guestlog::guestlog_list)
+                    .service(routes::admin::guestlog::guestlog_delete)
+                    .service(routes::admin::guestlog::guestlog_activestate)
+                    .service(routes::admin::guestlog::experience_new_post),
+            )
+    })
+    .bind((host.clone(), port))?
+    .run();
+
+    server.await.unwrap();
+
+    spotify_worker.await.unwrap();
+    nr_station_parser_worker.await.unwrap();
+    log::info!("Workers Shutdown");
+
+    Ok(())
+}
+
+struct AppState {
+    store: Mutex<HashMap<String, String>>,
+}

@@ -1,0 +1,32 @@
+{% extends "../template.html" %}
+{% block admincontent %}
+<h1 class="text-2xl">admin#guestlog#list</h1>
+<table class="table-auto border-1 border-white p-1">
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Message</th>
+        <th>Active</th>
+        <th>Avatar</th>
+        <th>Buttons</th>
+    </tr>
+    {% for log in guestlogs %}
+    <tr>
+        <td>{{ log.name }}</td>
+        <td>{{ log.email }}</td>
+        <td>{{ log.message }}</td>
+        <td>{{ log.active }}</td>
+        <td><img src="/uploads/{{ log.avatar}}" width="200" height="200" /></td>
+        <td class="flex gap-2">
+            <button data-controller="admin-delete" data-admin-delete-path-value="/admin/guestlog"
+                data-admin-delete-id-value="{{ log.id.unwrap() }}" data-action="click->admin-delete#process">Delete
+            </button>
+            <button data-controller="guestlog-activestate" data-guestlog-activestate-id-value="{{ log.id.unwrap() }}"
+                data-action="click->guestlog-activestate#process">Invert ActiveState
+            </button>
+        </td>
+
+    </tr>
+    {% endfor %}
+</table>
+{%endblock admincontent%}

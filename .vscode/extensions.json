@@ -1,4 +1,10 @@
 {
-  "recommendations": ["astro-build.astro-vscode"],
-  "unwantedRecommendations": []
+    "recommendations": [
+        "rust-lang.rust-analyzer",
+        "jnoortheen.nix-ide",
+        "mkhl.direnv",
+        "tamasfe.even-better-toml",
+        "fill-labs.dependi",
+        "golang.Go"
+    ]
 }

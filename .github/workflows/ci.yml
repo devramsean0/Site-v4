@@ -1,0 +1,45 @@
+on: [push]
+
+name: CI
+
+jobs:
+#  check:
+#    name: Rust project
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Install Nix
+#        uses: DeterminateSystems/nix-installer-action@main
+#      - uses: DeterminateSystems/magic-nix-cache-action@main
+#      - name: Run Bun install
+#        run: nix develop --command bun install
+#      - name: Run Release Cargo Build
+#        run: nix develop --command cargo build --release
+  build:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: devramsean0
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Docker image
+        run: docker build -t ghcr.io/devramsean0/site-v4:latest --build-arg PUBLIC_WEBSOCKET_PROTOCOL=wss .
+      - name: Push Docker image
+        run: docker push ghcr.io/devramsean0/site-v4:latest
+  deploy:
+    name: Deploy Update
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tailscale Login
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+      - name: Update container
+        run: tailscale ssh sean@scipio "cd sitev4 && docker compose down && docker compose up -d --pull always --remove-orphans"

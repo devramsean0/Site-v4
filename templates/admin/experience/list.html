@@ -1,0 +1,33 @@
+{% extends "../template.html" %}
+{% block admincontent %}
+<h1 class="text-2xl">admin#experience#list</h1>
+<table class="table-auto border-1 border-white p-1">
+    <tr>
+        <th>Title</th>
+        <th>Type</th>
+        <th>Company</th>
+        <th>Description</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Buttons</th>
+    </tr>
+    {% for experience in experiences %}
+    <tr>
+        <td>{{ experience.name }}</td>
+        <td>{{ experience.e_type }}</td>
+        <td>{{ experience.company }}</td>
+        <td>{{ experience.description }}</td>
+        <td>{{ experience.start_date }}</td>
+        <td>{{ experience.end_date }}</td>
+        <td class="flex gap-2">
+            <button data-controller="admin-delete" data-admin-delete-path-value="/admin/experience"
+                data-admin-delete-id-value="{{ experience.id.unwrap() }}"
+                data-action="click->admin-delete#process">Delete
+            </button>
+            <a href="/admin/experience/edit/{{ experience.id.unwrap() }}">Edit</a>
+        </td>
+
+    </tr>
+    {% endfor %}
+</table>
+{%endblock admincontent%}

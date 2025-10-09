@@ -1,0 +1,44 @@
+{% extends "../template.html" %}
+{% block admincontent %}
+<h1 class="text-2xl">admin#project#list</h1>
+<a href="/admin/project/new">New Project</a>
+<table class="table-auto border-1 border-white p-1">
+    <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>SRC</th>
+        <th>Docs</th>
+        <th>Demo</th>
+        <th>Preview IMG</th>
+        <th>Favourite</th>
+        <th>Technologies</th>
+        <th>Buttons</th>
+    </tr>
+    {% for project in projects %}
+    <tr>
+        <td>{{ project.name }}</td>
+        <td>{{ project.description }}</td>
+        <td>{{ project.get_src() }}</td>
+        <td>{{ project.get_docs() }}</td>
+        <td>{{ project.get_demo() }}</td>
+        <td><img src="/uploads/{{ project.get_preview_img() }}" width="200" height="200" /></td>
+        <td>
+            <input type="checkbox" {% if project.favourite==true %}checked{% endif %} readonly="true" />
+        <td>
+            <ul>
+                {% for tech in project.technologies %}
+                <li>{{ tech }}</li>
+                {% endfor %}
+            </ul>
+        </td>
+        <td class="flex gap-2">
+            <button data-controller="admin-delete" data-admin-delete-path-value="/admin/project"
+                data-admin-delete-id-value="{{ project.id.unwrap() }}" data-action="click->admin-delete#process">Delete
+            </button>
+            <a href="/admin/project/edit/{{ project.id.unwrap() }}">Edit</a>
+        </td>
+
+    </tr>
+    {% endfor %}
+</table>
+{%endblock admincontent%}

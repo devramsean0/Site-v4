@@ -1,0 +1,31 @@
+{% macro input(type, name, label, required, value) %}
+<div class="flex flex-col">
+    <label for="{{ name }}">{{ label }}:</label>
+    <input name="{{ name }}" type="{{ type }}" id="{{ name }}" value="{{ value }}" {% if required=="true" %}required{%
+        endif %} class="border-1 border-white p-1 rounded-md" />
+</div>
+{% endmacro %}
+
+{% macro submit_button (label) %}
+<button class="bg-white p-1 text-black w-full" type="submit">{{ label }}</button>
+{% endmacro %}
+
+{% macro select (name, label, options, required, value) %}
+<div class="flex flex-col">
+    <label for="{{ name }}">{{ label }}: </label>
+    <select name="{{ name }}" class="border-1 border-white p-1 rounded-md" value="{{ value }}" {% if required=="true"
+        %}required{% endif %}>
+        {% for option in options %}
+        <option>{{ option }}</option>
+        {% endfor %}
+    </select>
+</div>
+{% endmacro %}
+
+{% macro checkbox(name, label, required, checked) %}
+<div class="flex flex-col">
+    <label for="{{ name }}">{{ label }}:</label>
+    <input name="{{ name }}" type="checkbox" id="{{ name }}" {% if checked==true %}checked{% endif %} {% if
+        required=="true" %}required{% endif %} class="border-1 border-white p-1 rounded-md" />
+</div>
+{% endmacro %}

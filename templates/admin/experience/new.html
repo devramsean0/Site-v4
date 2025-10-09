@@ -1,0 +1,14 @@
+{% extends "../template.html" %}
+{%- import "../../parts/form.html" as form -%}
+{% block admincontent %}
+<h1 class="text-2xl">admin#experience#new</h1>
+<form action="/admin/experience" method="post">
+    {% call form::input("", "name", "Name", "true", "") %}
+    {% call form::input("", "company", "Company", "true", "") %}
+    {% call form::input("", "description", "Description", "true", "") %}
+    {% call form::input("date", "start_date", "Start Date", "true", "") %}
+    {% call form::input("date", "end_date", "End Date", "false", "") %}
+    {% call form::select("e_type", "Type", e_type, "true", "") %}
+    {% call form::submit_button("Post") %}
+</form>
+{%endblock admincontent%}
