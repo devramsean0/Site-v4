@@ -107,6 +107,8 @@ async fn main() -> std::io::Result<()> {
             .service(routes::index::index_get)
             .service(routes::ws::ws_route)
             .service(routes::api::api_spotify_get)
+            .service(routes::blog::blog_list)
+            .service(routes::blog::blog_get)
             .service(routes::admin::authentication::admin_login_get)
             .service(routes::admin::authentication::admin_login_post)
             .service(
@@ -129,7 +131,14 @@ async fn main() -> std::io::Result<()> {
                     .service(routes::admin::guestlog::guestlog_list)
                     .service(routes::admin::guestlog::guestlog_delete)
                     .service(routes::admin::guestlog::guestlog_activestate)
-                    .service(routes::admin::guestlog::experience_new_post),
+                    .service(routes::admin::guestlog::experience_new_post)
+                    // Blog
+                    .service(routes::admin::blog::blog_list)
+                    .service(routes::admin::blog::blog_new_post)
+                    .service(routes::admin::blog::blog_delete)
+                    .service(routes::admin::blog::blog_edit_get)
+                    .service(routes::admin::blog::blog_edit_post)
+                    .service(routes::admin::blog::blog_new_get),
             )
     })
     .bind((host.clone(), port))?

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="bg-s1 min-h-screen text-center p-8 flex-col flex items-center">
+    <section class="flex flex-col items-center">
+        <img src="/uploads/{{ article.banner_img }}" width="500px" alt="Blog Post Banner Image"
+            class="rounded-lg mb-2" />
+        <h1 class="text-3xl col-span-2">{{ article.title }}</h1>
+        <div class="flex flex-row justify-center gap-2">
+            <p class="flex flex-row justify-center items-center">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M5 22H19C20.103 22 21 21.103 21 20V6C21 4.897 20.103 4 19 4H17V2H15V4H9V2H7V4H5C3.897 4 3 4.897 3 6V20C3 21.103 3.897 22 5 22ZM16 16H13V19H11V16H8V14H11V11H13V14H16V16ZM5 7H19V9H5V7Z"
+                        fill="black" />
+                </svg>
+                {{ article.created_at.unwrap().to_rfc2822() }}
+            </p>
+            {% if article.updated_at.is_some() %}
+            <p class="flex flex-row justify-center items-center">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M5 22H19C20.103 22 21 21.103 21 20V6C21 4.897 20.103 4 19 4H17V2H15V4H9V2H7V4H5C3.897 4 3 4.897 3 6V20C3 21.103 3.897 22 5 22ZM9.799 19.987H8V18.188L12.977 13.218L14.776 15.017L9.799 19.987ZM15.623 14.17L13.824 12.371L15.196 11L16.995 12.799L15.623 14.17ZM5 7H19V9H5V7Z"
+                        fill="black" />
+                </svg>
+                {{ article.updated_at.unwrap().to_rfc2822() }}
+            </p>
+            {% endif %}
+        </div>
+    </section>
+    <article class="prose lg:prose-xl">
+
+        {{ article_contents|safe }}
+    </article>
+</main>
+{% endblock content %}

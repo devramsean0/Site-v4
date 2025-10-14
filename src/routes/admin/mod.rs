@@ -4,6 +4,7 @@ use askama::Template;
 use crate::templates::AdminOptionsTemplate;
 
 pub mod authentication;
+pub mod blog;
 pub mod experience;
 pub mod guestlog;
 pub mod projects;

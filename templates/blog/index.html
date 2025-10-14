@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="bg-s1 min-h-screen text-center">
+    <h2 class="text-4xl text-white">My Experience</h2>
+    <ul>
+        {% for article in articles %}
+        <li>
+            <a href="/blog/{{ article.slug}}">{{ article.title }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+</main>
+{% endblock content %}

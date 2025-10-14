@@ -1,0 +1,13 @@
+{% extends "../template.html" %}
+{%- import "../../parts/form.html" as form -%}
+{% block admincontent %}
+<h1 class="text-2xl">admin#blog#edit</h1>
+<form action="/admin/blog/edit/{{ blog.id.unwrap() }}" method="post" enctype="multipart/form-data">
+    {% call form::input("", "title", "Title", "true", blog.title) %}
+    {% call form::textarea("body", "Body", "true", blog.body) %}
+    <img src="/uploads/{{ blog.get_banner_img() }}" />
+    {% call form::input("file", "bannner_img", "Banner IMG", "false", blog.get_banner_img()) %}
+    {% call form::checkbox("published", "Published", "true", blog.published) %}
+    {% call form::submit_button("Edit") %}
+</form>
+{%endblock admincontent%}

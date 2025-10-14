@@ -103,3 +103,41 @@ pub struct AdminGuestlogListTemplate<'a> {
     pub error: Option<&'a str>,
     pub guestlogs: Vec<db::Guestlog>,
 }
+
+#[derive(Template)]
+#[template(path = "blog/index.html")]
+pub struct BlogListTemplate<'a> {
+    pub title: &'a str,
+    pub articles: Vec<db::Blog>,
+}
+
+#[derive(Template)]
+#[template(path = "admin/blog/list.html")]
+pub struct AdminBlogListTemplate<'a> {
+    pub title: &'a str,
+    pub error: Option<&'a str>,
+    pub posts: Vec<db::Blog>,
+}
+
+#[derive(Template)]
+#[template(path = "admin/blog/new.html")]
+pub struct AdminBlogNewTemplate<'a> {
+    pub title: &'a str,
+    pub error: Option<&'a str>,
+}
+
+#[derive(Template)]
+#[template(path = "admin/blog/edit.html")]
+pub struct AdminBlogEditTemplate<'a> {
+    pub title: &'a str,
+    pub error: Option<&'a str>,
+    pub blog: db::Blog,
+}
+
+#[derive(Template)]
+#[template(path = "blog/slug.html")]
+pub struct BlogSlugTemplate<'a> {
+    pub title: &'a str,
+    pub article: db::Blog,
+    pub article_contents: String,
+}

@@ -1,0 +1,30 @@
+{% extends "../template.html" %}
+{% block admincontent %}
+<h1 class="text-2xl">admin#blog#list</h1>
+<a href="/admin/blog/new">New Post</a>
+<table class="table-auto border-1 border-white p-1">
+    <tr>
+        <th>Slug</th>
+        <th>Title</th>
+        <th>Published</th>
+        <th>Buttons</th>
+    </tr>
+    {% for post in posts %}
+    <tr>
+        <td>{{ post.slug }}</td>
+        <td>{{ post.title }}</td>
+        <td>
+            <input type="checkbox" {% if post.published==true %}checked{% endif %} readonly="true" />
+        </td>
+        <td class="flex gap-2">
+            <button data-controller="admin-delete" data-admin-delete-path-value="/admin/blog"
+                data-admin-delete-id-value="{{ post.id.unwrap() }}" data-action="click->admin-delete#process">Delete
+            </button>
+            <a href="/admin/blog/edit/{{ post.id.unwrap() }}">Edit</a>
+            <a href="/blog/{{ post.slug }}">View</a>
+        </td>
+
+    </tr>
+    {% endfor %}
+</table>
+{%endblock admincontent%}

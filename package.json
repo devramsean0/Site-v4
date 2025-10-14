@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@hotwired/stimulus": "^3.2.2",
+    "@tailwindcss/typography": "^0.5.19",
     "bun-stimulus-plugin": "^3.0.0"
   }
 }

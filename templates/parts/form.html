@@ -29,3 +29,11 @@
         required=="true" %}required{% endif %} class="border-1 border-white p-1 rounded-md" />
 </div>
 {% endmacro %}
+
+{% macro textarea(name, label, required, value) %}
+<div class="flex flex-col">
+    <label for="{{ name }}">{{ label }}:</label>
+    <textarea name="{{ name }}" id="{{ name }}" {% if required=="true" %}required{% endif %}
+        class="border-1 border-white p-1 rounded-md">{{ value }}</textarea>
+</div>
+{% endmacro %}

@@ -1,12 +1,12 @@
 use async_sqlite::Pool;
-use chrono::NaiveDate;
+use chrono::{DateTime, Local, NaiveDate, TimeZone};
 use rand::Rng;
 use rusqlite::{Error, Row};
 
 use crate::{
     routes::admin::{
-        experience::AdminExperienceSelectProps, guestlog::GuestlogSelectProps,
-        projects::AdminProjectSelectProps,
+        blog::BlogSelectProps, experience::AdminExperienceSelectProps,
+        guestlog::GuestlogSelectProps, projects::AdminProjectSelectProps,
     },
     ternary,
     types::DisplayOption,
@@ -105,7 +105,21 @@ pub async fn create_tables(pool: &Pool) -> Result<(), async_sqlite::Error> {
             [],
         )
         .unwrap();
-
+        // blog
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS blog (
+            id INTEGER PRIMARY KEY,
+            title TEXT NOT NULL,
+            body TEXT NOT NULL,
+            banner_img TEXT NOT NULL,
+            published INTEGER NOT NULL,
+            slug TEXT NOT NULL UNIQUE,
+            createdAt TEXT NOT NULL,
+            updatedAt TEXT
+        )",
+            [],
+        )
+        .unwrap();
         Ok(())
     })
     .await?;
@@ -538,6 +552,148 @@ impl Guestlog {
                 .prepare("UPDATE guestlog SET active = ?1 WHERE id = ?2")
                 .unwrap();
             stmt.execute([if log.active { 0 } else { 1 }, id.parse::<i64>().unwrap()])?;
+            Ok(())
+        })
+        .await?;
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq)]
+pub struct Blog {
+    pub id: Option<i64>,
+    pub slug: DisplayOption<String>,
+    pub title: String,
+    pub body: String,
+    pub banner_img: DisplayOption<String>,
+    pub published: bool,
+    pub created_at: Option<DateTime<Local>>,
+    pub updated_at: Option<DateTime<Local>>,
+}
+
+impl Blog {
+    fn map_from_row(row: &Row) -> Result<Self, Error> {
+        let published_int: i64 = row.get(4)?;
+        let published = published_int == 1;
+        Ok(Self {
+            id: row.get(0)?,
+            title: row.get(1)?,
+            body: row.get(2)?,
+            banner_img: row.get(3)?,
+            published: published,
+            slug: row.get(5)?,
+            created_at: {
+                // createdAt is stored as TEXT (stringified timestamp). Read as String and parse.
+                let ts_str: String = row.get(6)?;
+                match ts_str.parse::<i64>() {
+                    Ok(ts) => Local.timestamp_opt(ts, 0).single(),
+                    Err(_) => None,
+                }
+            },
+            updated_at: {
+                // updatedAt may be NULL. Read as Option<String> and parse when present.
+                let opt_ts_str: Option<String> = row.get(7)?;
+                match opt_ts_str {
+                    Some(s) => match s.parse::<i64>() {
+                        Ok(ts) => Local.timestamp_opt(ts, 0).single(),
+                        Err(_) => None,
+                    },
+                    None => None,
+                }
+            },
+        })
+    }
+
+    pub async fn published(pool: &Pool) -> Result<Vec<Self>, async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("SELECT * FROM blog WHERE published=1;")?;
+            let status_iter = stmt
+                .query_map([], |row| Ok(Self::map_from_row(row).unwrap()))
+                .unwrap();
+
+            let mut statuses = Vec::new();
+            for status in status_iter {
+                statuses.push(status?);
+            }
+            Ok(statuses)
+        })
+        .await
+    }
+    pub async fn get_by_slug(
+        slug: String,
+        pool: &Pool,
+    ) -> Result<Option<Self>, async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("SELECT * FROM blog WHERE slug = ?1")?;
+            let user = match stmt.query_one([slug], |row| Self::map_from_row(row)) {
+                Ok(user) => Some(user),
+                _ => None,
+            };
+            Ok(user)
+        })
+        .await
+    }
+    pub async fn all(pool: &Pool) -> Result<Vec<Self>, async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("SELECT * FROM blog")?;
+            let status_iter = stmt
+                .query_map([], |row| Ok(Self::map_from_row(row).unwrap()))
+                .unwrap();
+
+            let mut statuses = Vec::new();
+            for status in status_iter {
+                statuses.push(status?);
+            }
+            Ok(statuses)
+        })
+        .await
+    }
+    pub async fn insert(pool: &Pool, data: Blog) -> Result<(), async_sqlite::Error> {
+        let now = chrono::Local::now();
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("INSERT INTO blog (title, body, banner_img, published, slug, createdAt) VALUES (?1, ?2, ?3, ?4, ?5, ?6)").unwrap();
+            stmt.execute([data.title, data.body, data.banner_img.unwrap(), ternary!(data.published => "1".to_string(), "0".to_string()), data.slug.unwrap(), now.timestamp().to_string()])?;
+            Ok(())
+        })
+        .await?;
+        Ok(())
+    }
+    pub async fn delete(pool: &Pool, data: BlogSelectProps) -> Result<(), async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("DELETE FROM blog WHERE id = ?1").unwrap();
+            stmt.execute([data.id.to_owned()])?;
+            Ok(())
+        })
+        .await?;
+        Ok(())
+    }
+    pub async fn get_by_id(id: String, pool: &Pool) -> Result<Option<Self>, async_sqlite::Error> {
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("SELECT * FROM blog WHERE id = ?1")?;
+            let blog = match stmt.query_one([id], |row| Self::map_from_row(row)) {
+                Ok(blog) => Some(blog),
+                _ => None,
+            };
+            Ok(blog)
+        })
+        .await
+    }
+
+    pub fn get_banner_img(&self) -> &str {
+        self.banner_img.as_deref().unwrap()
+    }
+    pub async fn update(pool: &Pool, data: Blog) -> Result<(), async_sqlite::Error> {
+        let now = chrono::Local::now();
+        pool.conn(move |conn| {
+            let mut stmt = conn.prepare("UPDATE blog SET title = ?1, body = ?2, banner_img = ?3, published = ?4, updatedAt = ?5 WHERE id=?6")?;
+            stmt.execute([
+                data.title,
+                data.body,
+                data.banner_img.unwrap(),
+                ternary!(data.published => "1".to_string(), "0".to_string()),
+                now.timestamp().to_string(),
+                data.id.unwrap().to_string()
+            ])?;
             Ok(())
         })
         .await?;
