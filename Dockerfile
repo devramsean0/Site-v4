@@ -40,7 +40,7 @@ RUN nix-env -iA nixpkgs.openssl nixpkgs.sqlite
 COPY --from=rs_build /app/target/release/site-v4 /app/site-v4
 COPY --from=rs_build /app/target/release/importer /app/importer
 COPY --from=rs_build /app/assets /app/assets
-COPY --from=rs_build /app/templates /app/templates
+# COPY --from=rs_build /app/templates /app/templates
 COPY --from=rs_build /app/compiled_assets /app/compiled_assets
 
 # Copy go deps
