@@ -17,6 +17,7 @@ use crate::websocket_channel::ChannelsActor;
 mod assets;
 mod db;
 mod middleware;
+mod prometheus;
 mod routes;
 mod templates;
 mod types;
@@ -98,6 +99,7 @@ async fn main() -> std::io::Result<()> {
                     .build(),
             )
             .wrap(middleware::content_type::DefaultHtmlContentType)
+            .wrap(prometheus::build_prom())
             .service(Files::new("compiled_assets/", "compiled_assets/"))
             .service(Files::new("assets/", "assets/"))
             .service(Files::new("uploads/", upload_folder.as_str()))
