@@ -111,6 +111,7 @@ async fn main() -> std::io::Result<()> {
             .service(routes::api::api_spotify_get)
             .service(routes::blog::blog_list)
             .service(routes::blog::blog_get)
+            .service(routes::admin::guestlog::experience_new_post)
             .service(routes::admin::authentication::admin_login_get)
             .service(routes::admin::authentication::admin_login_post)
             .service(
@@ -133,7 +134,6 @@ async fn main() -> std::io::Result<()> {
                     .service(routes::admin::guestlog::guestlog_list)
                     .service(routes::admin::guestlog::guestlog_delete)
                     .service(routes::admin::guestlog::guestlog_activestate)
-                    .service(routes::admin::guestlog::experience_new_post)
                     // Blog
                     .service(routes::admin::blog::blog_list)
                     .service(routes::admin::blog::blog_new_post)
